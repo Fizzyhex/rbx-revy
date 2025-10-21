@@ -1,0 +1,11 @@
+{
+    "name": "revy-build",
+    "emitLegacyScripts": false,
+    "tree": {
+        "$path": "src/",
+
+        "packages": {
+            "$path": "Packages"
+        }
+    }
+}

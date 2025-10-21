@@ -1,0 +1,11 @@
+{
+    "luau-lsp.sourcemap.rojoProjectFile": "dev.project.json",
+    "luau-lsp.sourcemap.autogenerate": false,
+    "stylua.targetReleaseVersion": "latest",
+    "luau-lsp.completion.imports.stringRequires.enabled": true,
+    "luau-lsp.fflags.enableNewSolver": false,
+    "[luau]": {
+        "editor.defaultFormatter": "JohnnyMorganz.stylua",
+        "editor.formatOnSave": true
+    }
+}

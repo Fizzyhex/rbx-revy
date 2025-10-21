@@ -1,0 +1,121 @@
+local ContextActionService = game:GetService("ContextActionService")
+local RunService = game:GetService("RunService")
+
+local jabby = require("@packages/jabby")
+local jecs = require("@packages/jecs")
+local planck = require("@packages/planck")
+local planck_jabby = require("@packages/planck_jabby")
+local planck_run_service = require("@packages/planck_run_service")
+local system_utils = require("@self/system_utils")
+local types = require("@self/types")
+
+type SystemFn = types.SystemFn
+export type RevyApp = types.RevyApp
+export type System = types.System
+export type Schedule = types.Schedule
+export type Plugin = types.Plugin
+export type Resource<T = any> = types.Resource<T>
+
+local schedule_phase_map = {
+	update = planck_run_service.Phases.PostSimulation,
+	pre_render = planck_run_service.Phases.PreRender,
+}
+
+local revy = { ecs = jecs }
+
+function revy.plugin(_name: string, build: types.PluginBuildFn)
+	local plugin: types.Plugin = { type = "revy_plugin", build = build }
+	return plugin
+end
+
+function revy.system(func: (world: jecs.World) -> ())
+	local system: types.System = { type = "revy_system", system = func :: SystemFn }
+	return system
+end
+
+function revy.resource<T>(id: string)
+	return (id :: any) :: T
+end
+
+function revy.app()
+	local plugins = {}
+	local resources: { [any]: Resource } = {}
+
+	local app = {} :: RevyApp
+	app.world = jecs.world()
+
+	local scheduler =
+		planck.Scheduler.new(app.world):addPlugin(planck_jabby.new()):addPlugin(planck_run_service.Plugin.new())
+
+	function app:insert_resource<T>(resource: Resource<T>, data: T)
+		resources[resource] = data :: any
+		return self
+	end
+
+	function app:get_resource<T>(resource: Resource<T>)
+		return resources[resource :: any] :: any
+	end
+
+	function app:add_plugin(plugin: Plugin)
+		table.insert(plugins, plugin)
+		return self
+	end
+
+	function app:add_systems(schedule: Schedule, ...)
+		local phase = schedule_phase_map[schedule]
+		assert(phase, `Invalid schedule '{schedule}'`)
+		local systems = {}
+
+		for _, system in ... do
+			table.insert(systems, system_utils.to_planck(system))
+		end
+
+		scheduler:addSystems(systems, phase)
+		return self
+	end
+
+	function app:open_debugger()
+		return self
+	end
+
+	function app:run()
+		jabby.register({
+			applet = jabby.applets.world,
+			name = "Revy World",
+			configuration = {
+				world = app.world,
+			},
+		})
+
+		if RunService:IsClient() then
+			local client = jabby.obtain_client()
+
+			local function create_widget()
+				client.spawn_app(client.apps.home :: any, nil)
+			end
+
+			app.open_debugger = function(_self)
+				create_widget()
+				return _self
+			end
+		end
+
+		for _, plugin in plugins do
+			plugin.build(app)
+		end
+
+		return self
+	end
+
+	function app:bind_debugger(key_code: Enum.KeyCode)
+		ContextActionService:BindAction("Open Debugger (Jabby)", function()
+			app:open_debugger()
+		end, false, key_code)
+
+		return self
+	end
+
+	return app
+end
+
+return revy
