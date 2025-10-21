@@ -1,7 +1,7 @@
 [package]
 name = "fizzyhex/revy"
 description = "toolkit"
-version = "0.2.6"
+version = "0.3.0"
 registry = "https://github.com/UpliftGames/wally-index"
 realm = "shared"
 private = false
@@ -30,3 +30,4 @@ jabby = "alicesaidhi/jabby@0.2.0"
 planck = "yetanotherclown/planck@0.2.0"
 planck_jabby = "yetanotherclown/planck-jabby@0.2.0"
 planck_run_service = "yetanotherclown/planck-runservice@0.2.0"
+rewire = "sayhisam1/rewire@0.3.0"

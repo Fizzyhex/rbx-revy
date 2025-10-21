@@ -5,7 +5,7 @@ export type SystemFn = planck.SystemFn<>
 
 export type PluginBuildFn = (app: RevyApp) -> ()
 
-export type System = { type: "revy_system", system: SystemFn }
+export type System = { type: "revy_system", id: string, system: SystemFn }
 
 export type Plugin = {
 	type: "revy_plugin",
@@ -23,6 +23,7 @@ export type RevyApp = {
 	bind_debugger: (self: RevyApp, key: Enum.KeyCode) -> RevyApp,
 	get_resource: <T>(self: RevyApp, resource: Resource<T>) -> T,
 	insert_resource: <T>(self: RevyApp, resource: Resource<T>, data: T) -> RevyApp,
+	enable_hot_reloading: (self: RevyApp, container: Instance) -> RevyApp,
 }
 
 export type Schedule = "update" | "pre_render"

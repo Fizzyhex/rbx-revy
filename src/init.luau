@@ -6,6 +6,7 @@ local jecs = require("@packages/jecs")
 local planck = require("@packages/planck")
 local planck_jabby = require("@packages/planck_jabby")
 local planck_run_service = require("@packages/planck_run_service")
+local rewire = require("@packages/rewire")
 local new_plugin = require("@self/new_plugin")
 local system_utils = require("@self/system_utils")
 local types = require("@self/types")
@@ -43,8 +44,8 @@ local revy = { ecs = jecs }
 
 revy.plugin = new_plugin
 
-function revy.system(func: (world: jecs.World) -> ())
-	local system: types.System = { type = "revy_system", system = func :: SystemFn }
+function revy.system(id: string, func: (world: jecs.World) -> ())
+	local system: types.System = { type = "revy_system", id = id, system = func :: SystemFn }
 	return system
 end
 
@@ -55,6 +56,11 @@ end
 function revy.app()
 	local plugins = {}
 	local resources: { [any]: Resource } = {}
+
+	local system_map = {}
+	local system_update_cache = {}
+
+	local hot_reloader = rewire.HotReloader.new()
 
 	local app = {} :: RevyApp
 	app.world = jecs.world()
@@ -81,11 +87,14 @@ function revy.app()
 		assert(phase, `Invalid schedule '{schedule}'`)
 		local systems = {}
 
-		for _, system in { ... } do
-			table.insert(systems, system_utils.to_planck(system))
+		for _, module in { ... } do
+			local system = system_utils.to_planck(module)
+			system_map[module.id] = system
+			table.insert(systems, system)
 		end
 
 		scheduler:addSystems(systems, phase)
+
 		return self
 	end
 
@@ -132,6 +141,44 @@ function revy.app()
 		return self
 	end
 
+	function app:enable_hot_reloading(container: Instance)
+		hot_reloader:scan(container, function(module)
+			local ok, system = pcall(require, module)
+
+			if not ok then
+				warn(`Error while hot reloading {module.Name}: {system}`)
+				return
+			end
+
+			if system_map[system.id] then
+				scheduler:replaceSystem(system_map[system.id], system)
+				print(`Hot reloading {system.id}`)
+			else
+				local schedule = system_update_cache[system.id] or "update"
+				app:add_systems(schedule, system)
+				print(`Added new system {system.id} on schedule '{schedule}'`)
+			end
+		end, function(module, context)
+			if context.isReloading then
+				return
+			end
+
+			local ok, system = pcall(require, module)
+
+			if not ok then
+				warn(`Error while unreloading {module.Name}: {system}`)
+				return
+			end
+
+			if system_map[system.id] then
+				scheduler:removeSystem(system_map[system.id])
+				print(`Removed system '{system.id}'`)
+			end
+		end)
+
+		return self
+	end
+
 	app:add_plugin(revy.time_plugin)
 
 	return app
@@ -147,7 +194,7 @@ revy.time_plugin = revy.plugin("Time", function(app)
 
 	app:add_systems(
 		"update",
-		revy.system(function(_)
+		revy.system("revy.time", function(_)
 			local now = os.clock()
 			time.delta = now - last_tick
 			last_tick = now
