@@ -81,7 +81,7 @@ function revy.app()
 		assert(phase, `Invalid schedule '{schedule}'`)
 		local systems = {}
 
-		for _, system in ... do
+		for _, system in { ... } do
 			table.insert(systems, system_utils.to_planck(system))
 		end
 
@@ -146,7 +146,9 @@ revy.time_plugin = revy.plugin("Time", function(app)
 	app:add_systems(
 		"update",
 		revy.system(function(_)
-			time.delta = os.clock() - last_tick
+			local now = os.clock()
+			time.delta = now - last_tick
+			last_tick = now
 		end)
 	)
 end)

@@ -4,12 +4,8 @@
     "tree": {
         "$path": "Packages",
 
-        "revy-packages": {
-            "$className": "Folder",
-
-            "revy": {
-                "$path": "src/"
-            }
+        "revy": {
+            "$path": "src/"
         }
     }
 }
