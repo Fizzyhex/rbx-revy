@@ -123,8 +123,10 @@ function revy.app()
 	end
 
 	function app:bind_debugger(key_code: Enum.KeyCode)
-		ContextActionService:BindAction("Open Debugger (Jabby)", function()
-			app:open_debugger()
+		ContextActionService:BindAction("Open Debugger (Jabby)", function(_, state: Enum.UserInputState)
+			if state == Enum.UserInputState.Begin then
+				app:open_debugger()
+			end
 		end, false, key_code)
 
 		return self
