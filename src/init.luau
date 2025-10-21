@@ -9,6 +9,23 @@ local planck_run_service = require("@packages/planck_run_service")
 local system_utils = require("@self/system_utils")
 local types = require("@self/types")
 
+export type Archetype = jecs.Archetype
+export type QueryInner = jecs.QueryInner
+export type Record = jecs.Record
+export type ComponentRecord = jecs.ComponentRecord
+export type ComponentIndex = jecs.ComponentIndex
+export type Archetypes = jecs.Archetypes
+export type EntityIndex = jecs.EntityIndex
+export type Entity<T = any> = jecs.Entity<T>
+export type Id<T = any> = jecs.Id<T>
+export type Pair<P, O> = jecs.Pair<P, O>
+export type Item<T...> = jecs.Item<T...>
+export type Iter<T...> = jecs.Iter<T...>
+export type Query<T...> = jecs.Query<T...>
+export type Observer = jecs.Observer
+export type Observable = jecs.Observable
+export type World = jecs.World
+
 type SystemFn = types.SystemFn
 export type RevyApp = types.RevyApp
 export type System = types.System
