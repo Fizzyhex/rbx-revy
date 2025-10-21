@@ -6,6 +6,7 @@ local jecs = require("@packages/jecs")
 local planck = require("@packages/planck")
 local planck_jabby = require("@packages/planck_jabby")
 local planck_run_service = require("@packages/planck_run_service")
+local new_plugin = require("@self/new_plugin")
 local system_utils = require("@self/system_utils")
 local types = require("@self/types")
 
@@ -40,10 +41,7 @@ local schedule_phase_map = {
 
 local revy = { ecs = jecs }
 
-function revy.plugin(_name: string, build: types.PluginBuildFn)
-	local plugin: types.Plugin = { type = "revy_plugin", build = build }
-	return plugin
-end
+revy.plugin = new_plugin
 
 function revy.system(func: (world: jecs.World) -> ())
 	local system: types.System = { type = "revy_system", system = func :: SystemFn }
@@ -132,7 +130,25 @@ function revy.app()
 		return self
 	end
 
+	app:add_plugin(revy.time_plugin)
+
 	return app
 end
+
+revy.time = revy.resource("Time") :: Resource<{ delta: number }>
+revy.time_plugin = revy.plugin("Time", function(app)
+	local resource = revy.resource("Time") :: Resource<{ delta: number }>
+	local time = { delta = 0 }
+
+	app:insert_resource(resource, time)
+	local last_tick = os.clock()
+
+	app:add_systems(
+		"update",
+		revy.system(function(_)
+			time.delta = os.clock() - last_tick
+		end)
+	)
+end)
 
 return revy

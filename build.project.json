@@ -1,7 +1,0 @@
-{
-    "name": "revy-build",
-    "emitLegacyScripts": false,
-    "tree": {
-        "$path": "dist/"
-    }
-}

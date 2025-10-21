@@ -1,19 +1,26 @@
 [package]
 name = "fizzyhex/revy"
 description = "toolkit"
-version = "0.0.6"
+version = "0.2.0"
 registry = "https://github.com/UpliftGames/wally-index"
 realm = "shared"
 private = false
-include = ["build.project.json", "src"]
+include = ["default.project.json", "dist"]
 exclude = [
-    "default.project.json",
+    "dev.project.json",
     ".github",
 	".gitattributes",
 	".gitignore",
     ".luaurc",
     ".copilotignore",
-	"README.md"
+	"README.md",
+    "scripts",
+    "src",
+    "sourcemap.json",
+    "scripts",
+    "aftman.toml",
+    "selene.toml",
+    "selene_definitions.yml"
 ]
 
 [dependencies]

@@ -9,6 +9,6 @@ if [ ! -d "Packages" ]; then
     sh scripts/install-packages.sh
 fi
 
-rojo serve build.project.json \
-    & rojo sourcemap default.project.json -o sourcemap.json --watch \
+rojo serve default.project.json \
+    & rojo sourcemap dev.project.json -o sourcemap.json --watch \
     & ROBLOX_DEV=true darklua process --config .darklua.json --watch src/ dist/
