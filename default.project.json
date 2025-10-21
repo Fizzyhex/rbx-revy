@@ -2,10 +2,10 @@
     "name": "revy",
     "emitLegacyScripts": false,
     "tree": {
-        "$path": "src/",
+        "$path": "Packages",
 
-        "packages": {
-            "$path": "Packages"
+        "revy": {
+            "$path": "src/"
         }
     }
 }
