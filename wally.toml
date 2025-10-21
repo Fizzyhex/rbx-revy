@@ -1,10 +1,20 @@
 [package]
-name = "fizzyhex/runk"
+name = "fizzyhex/revy"
 description = "toolkit"
-version = "0.1.0"
+version = "0.0.5"
 registry = "https://github.com/UpliftGames/wally-index"
 realm = "shared"
-private = true
+private = false
+include = ["build.project.json", "src"]
+exclude = [
+    "default.project.json",
+    ".github",
+	".gitattributes",
+	".gitignore",
+    ".luaurc",
+    ".copilotignore",
+	"README.md"
+]
 
 [dependencies]
 jecs = "ukendio/jecs@0.6.0"

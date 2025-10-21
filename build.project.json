@@ -5,7 +5,7 @@
         "$path": "dist/",
 
         "packages": {
-            "$path": "Packages"
+            "$path": ".."
         }
     }
 }
