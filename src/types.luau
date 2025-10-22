@@ -1,5 +1,6 @@
 local jecs = require("@packages/jecs")
 local planck = require("@packages/planck")
+local replecs = require("@packages/replecs")
 
 export type SystemFn = planck.SystemFn<>
 
@@ -14,18 +15,47 @@ export type Plugin = {
 
 export type Resource<T = any> = string & { __T: T }
 
-export type RevyApp = {
+export type RevyApp<App = {}> = App & {
 	world: jecs.World,
-	add_plugin: (self: RevyApp, plugin: Plugin) -> RevyApp,
-	add_systems: (self: RevyApp, schedule: Schedule, ...System) -> RevyApp,
-	run: (self: RevyApp) -> RevyApp,
-	open_debugger: (self: RevyApp) -> RevyApp,
-	bind_debugger: (self: RevyApp, key: Enum.KeyCode) -> RevyApp,
-	get_resource: <T>(self: RevyApp, resource: Resource<T>) -> T,
-	insert_resource: <T>(self: RevyApp, resource: Resource<T>, data: T) -> RevyApp,
-	enable_hot_reloading: (self: RevyApp, container: Instance) -> RevyApp,
+	client_replicator: replecs.Client,
+	server_replicator: replecs.Server,
+	add_systems: (self: RevyApp<App>, schedule: Schedule, ...System) -> RevyApp<App>,
+	open_debugger: (self: RevyApp<App>) -> RevyApp<App>,
+	bind_debugger: (self: RevyApp<App>, key: Enum.KeyCode) -> RevyApp<App>,
+	get_resource: <T>(self: RevyApp<App>, resource: Resource<T>) -> T,
+	insert_resource: <T>(self: RevyApp<App>, resource: Resource<T>, data: T) -> RevyApp<App>,
 }
 
-export type Schedule = "update" | "pre_render"
+-- Anything that can only happen before an app is ran goes here
+export type RevyAppCommands = RevyApp<{
+	add_plugin: (self: RevyAppCommands, plugin: Plugin) -> RevyAppCommands,
+	enable_hot_reloading: (self: RevyAppCommands, container: Instance) -> RevyAppCommands,
+
+	--[=[
+		In-depth example: https://pepeeltoro41.github.io/replecs/started/summary/
+
+		```luau
+		local components = {
+			position = world:component(),
+			velocity = world:component(),
+			player = world:component(),
+			health = world:component(),
+			alive = world:tag(),
+		}
+
+		revy:network_components(components)
+		```
+	]=]
+	network_components: (self: RevyAppCommands, components: { [string]: jecs.Entity }) -> RevyAppCommands,
+
+	run: (self: RevyAppCommands) -> RevyApp,
+}>
+
+export type Schedule = "update" | "pre_render" | "start"
+
+--- Default components
+
+export type Renderer = jecs.Entity<Model>
+export type Transform = jecs.Entity<CFrame>
 
 return nil

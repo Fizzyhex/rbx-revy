@@ -1,23 +1,22 @@
 local ContextActionService = game:GetService("ContextActionService")
 local RunService = game:GetService("RunService")
 
+local replecs = require("@packages/replecs")
 local jabby = require("@packages/jabby")
 local jecs = require("@packages/jecs")
 local planck = require("@packages/planck")
 local planck_jabby = require("@packages/planck_jabby")
 local planck_run_service = require("@packages/planck_run_service")
 local rewire = require("@packages/rewire")
+local collect = require("@self/collect")
+local interval = require("@self/interval")
 local new_plugin = require("@self/new_plugin")
+local remotes = require("@self/remotes")
 local system_utils = require("@self/system_utils")
 local types = require("@self/types")
 
 export type Archetype = jecs.Archetype
 export type QueryInner = jecs.QueryInner
-export type Record = jecs.Record
-export type ComponentRecord = jecs.ComponentRecord
-export type ComponentIndex = jecs.ComponentIndex
-export type Archetypes = jecs.Archetypes
-export type EntityIndex = jecs.EntityIndex
 export type Entity<T = any> = jecs.Entity<T>
 export type Id<T = any> = jecs.Id<T>
 export type Pair<P, O> = jecs.Pair<P, O>
@@ -25,11 +24,17 @@ export type Item<T...> = jecs.Item<T...>
 export type Iter<T...> = jecs.Iter<T...>
 export type Query<T...> = jecs.Query<T...>
 export type Observer = jecs.Observer
-export type Observable = jecs.Observable
+export type observer = jecs.observer
 export type World = jecs.World
+export type Record = jecs.Record
+export type ComponentRecord = jecs.ComponentRecord
+export type ComponentIndex = jecs.ComponentIndex
+export type Archetypes = jecs.Archetypes
+export type EntityIndex = jecs.EntityIndex
 
 type SystemFn = types.SystemFn
-export type RevyApp = types.RevyApp
+export type RevyApp = types.RevyApp<{}>
+export type RevyAppCommands = types.RevyAppCommands
 export type System = types.System
 export type Schedule = types.Schedule
 export type Plugin = types.Plugin
@@ -38,11 +43,22 @@ export type Resource<T = any> = types.Resource<T>
 local schedule_phase_map = {
 	update = planck_run_service.Phases.PostSimulation,
 	pre_render = planck_run_service.Phases.PreRender,
+	start = planck.Phase.Startup,
 }
+
+local updates_interval = interval(1 / 20)
+local unreliables_interval = interval(1 / 30)
+
+-- Temp fix: Prevent replecs components clashing with ones created by whatever's using Revy
+for _ = 1, 10 do
+	--jecs.component()
+end
 
 local revy = { ecs = jecs }
 
 revy.plugin = new_plugin
+revy.collect = collect
+revy.interval = interval
 
 function revy.system(id: string, func: (world: jecs.World) -> ())
 	local system: types.System = { type = "revy_system", id = id, system = func :: SystemFn }
@@ -57,16 +73,30 @@ function revy.app()
 	local plugins = {}
 	local resources: { [any]: Resource } = {}
 
-	local system_map = {}
-	local system_update_cache = {}
-
+	local system_map: { [string]: SystemFn } = {}
 	local hot_reloader = rewire.HotReloader.new()
 
-	local app = {} :: RevyApp
+	local app = {} :: RevyAppCommands
 	app.world = jecs.world()
+
+	if RunService:IsClient() then
+		app.client_replicator = replecs.create_client(app.world)
+	else
+		app.server_replicator = replecs.create_server(app.world)
+	end
 
 	local scheduler =
 		planck.Scheduler.new(app.world):addPlugin(planck_jabby.new()):addPlugin(planck_run_service.Plugin.new())
+
+	local function unload_associated_systems(plugin_id: string)
+		for map_id, map_system in system_map do
+			if map_id == plugin_id or map_id:match(`^{plugin_id}.`) then
+				print("Unloading", map_id)
+				scheduler:removeSystem(map_system)
+				system_map[map_id] = nil
+			end
+		end
+	end
 
 	function app:insert_resource<T>(resource: Resource<T>, data: T)
 		resources[resource] = data :: any
@@ -88,6 +118,13 @@ function revy.app()
 		local systems = {}
 
 		for _, module in { ... } do
+			if module.type ~= "revy_system" then
+				warn(
+					`module.type = {module.type} when it should = 'revy_system' - it's invalid and will not be loaded. Create systems with revy.system().`
+				)
+				continue
+			end
+
 			local system = system_utils.to_planck(module)
 			system_map[module.id] = system
 			table.insert(systems, system)
@@ -103,6 +140,12 @@ function revy.app()
 	end
 
 	function app:run()
+		if RunService:IsClient() then
+			app.client_replicator:init()
+		else
+			app.server_replicator:init()
+		end
+
 		jabby.register({
 			applet = jabby.applets.world,
 			name = "Revy World",
@@ -124,6 +167,8 @@ function revy.app()
 			end
 		end
 
+		revy.network_plugin.build(app)
+
 		for _, plugin in plugins do
 			plugin.build(app)
 		end
@@ -141,40 +186,64 @@ function revy.app()
 		return self
 	end
 
+	-- TODO: Plugins are currently mistaken for systems, make this work with plugins and systems.
 	function app:enable_hot_reloading(container: Instance)
 		hot_reloader:scan(container, function(module)
-			local ok, system = pcall(require, module)
+			local ok, system_or_plugin = pcall(require, module)
 
 			if not ok then
-				warn(`Error while hot reloading {module.Name}: {system}`)
+				warn(`Hot reload failed - require({module:GetFullName()}) -> {system_or_plugin}`)
 				return
 			end
 
-			if system_map[system.id] then
-				scheduler:replaceSystem(system_map[system.id], system)
-				print(`Hot reloading {system.id}`)
+			if typeof(system_or_plugin) ~= "table" then
+				warn(`Hot reload failed - typeof(require({module:GetFullName()})) ~= table`)
+				return
+			end
+
+			local id = system_or_plugin.id
+
+			if typeof(id) ~= "string" then
+				warn(`Hot reload failed - require({module:GetFullName()}).id = {id} - expected string`)
+				return
+			end
+
+			unload_associated_systems(id)
+
+			if system_or_plugin.type == "revy_plugin" then
+				system_or_plugin.build(app)
+			elseif system_or_plugin.type == "revy_system" then
+				warn(
+					`Systems cannot be hot reloaded currently - use a revy.plugin instead of revy.system. (source: {id})`
+				)
 			else
-				local schedule = system_update_cache[system.id] or "update"
-				app:add_systems(schedule, system)
-				print(`Added new system {system.id} on schedule '{schedule}'`)
+				warn(
+					`require({module:GetFullName()}).type hasn't been identified as a revy plugin or system. No loading will occur.`
+				)
 			end
 		end, function(module, context)
 			if context.isReloading then
 				return
 			end
 
-			local ok, system = pcall(require, module)
+			local ok, system_or_plugin = pcall(require, module)
 
 			if not ok then
-				warn(`Error while unreloading {module.Name}: {system}`)
+				warn(`require({module:GetFullName()}) failed - cannot unload system. Error: {system_or_plugin}`)
 				return
 			end
 
-			if system_map[system.id] then
-				scheduler:removeSystem(system_map[system.id])
-				print(`Removed system '{system.id}'`)
-			end
+			unload_associated_systems(system_or_plugin.id)
 		end)
+
+		return self
+	end
+
+	function app:network_components(components)
+		for name, component in components do
+			app.world:add(component, replecs.shared)
+			app.world:set(component, jecs.Name, name)
+		end
 
 		return self
 	end
@@ -184,9 +253,75 @@ function revy.app()
 	return app
 end
 
-revy.time = revy.resource("Time") :: Resource<{ delta: number }>
-revy.time_plugin = revy.plugin("Time", function(app)
-	local resource = revy.resource("Time") :: Resource<{ delta: number }>
+local Renderer = jecs.component() :: types.Renderer
+jecs.meta(Renderer, jecs.Name, "Renderer")
+
+local Transform = jecs.component() :: types.Transform
+jecs.meta(Transform, jecs.Name, "Transform")
+
+revy.renderer = Renderer
+revy.transform = Transform
+revy.networked = replecs.shared :: typeof(jecs.tag())
+revy.reliable = replecs.reliable :: typeof(jecs.tag())
+revy.unreliable = replecs.unreliable :: typeof(jecs.tag())
+
+revy.network_plugin = revy.plugin("revy.network", function(app)
+	if RunService:IsServer() then
+		remotes.receive_full.OnServerInvoke = function(player)
+			if app.server_replicator:is_player_ready(player) then
+				return nil
+			end
+
+			app.server_replicator:mark_player_ready(player)
+			return app.server_replicator:get_full(player)
+		end
+
+		app:add_systems(
+			"update",
+			revy.system("revy.network.update", function()
+				if updates_interval() then
+					for player, buf, variants in app.server_replicator:collect_updates() do
+						print("Replicating", player, buf, variants)
+						remotes.collect_updates:FireClient(player, buf, variants)
+					end
+				end
+
+				if unreliables_interval() then
+					for player, buf, variants in app.server_replicator:collect_unreliable() do
+						remotes.collect_unreliable:FireClient(player, buf, variants)
+					end
+				end
+			end)
+		)
+	else
+		local updates = revy.collect(remotes.collect_updates.OnClientEvent)
+		local unreliables = revy.collect(remotes.collect_unreliable.OnClientEvent)
+
+		task.spawn(function()
+			print("Receiving data from server...")
+			local buf, variants = remotes.receive_full:InvokeServer()
+			print(buf, variants)
+			app.client_replicator:apply_full(buf, variants)
+		end)
+
+		app:add_systems(
+			"update",
+			revy.system("revy.network.update", function()
+				for buf, variants in updates do
+					app.client_replicator:apply_updates(buf, variants)
+				end
+
+				for buf, variants in unreliables do
+					app.client_replicator:apply_unreliable(buf, variants)
+				end
+			end)
+		)
+	end
+end)
+
+revy.time = revy.resource("time") :: Resource<{ delta: number }>
+revy.time_plugin = revy.plugin("revy.time", function(app)
+	local resource = revy.resource("revy.time") :: Resource<{ delta: number }>
 	local time = { delta = 0 }
 
 	app:insert_resource(resource, time)
@@ -194,7 +329,7 @@ revy.time_plugin = revy.plugin("Time", function(app)
 
 	app:add_systems(
 		"update",
-		revy.system("revy.time", function(_)
+		revy.system("revy.time.update", function(_)
 			local now = os.clock()
 			time.delta = now - last_tick
 			last_tick = now

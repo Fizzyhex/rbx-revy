@@ -1,6 +1,7 @@
 {
     "languageMode": "strict",
     "aliases": {
-        "packages": "./Packages/"
+        "packages": "./Packages/",
+        "revy": "./src/"
     }
 }

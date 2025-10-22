@@ -12,3 +12,4 @@ fi
 rojo serve default.project.json \
     & rojo sourcemap dev.project.json -o sourcemap.json --watch \
     & ROBLOX_DEV=true darklua process --config .darklua.json --watch src/ dist/
+    & ROBLOX_DEV=true darklua process --config .darklua.json --watch game/src game/dist

@@ -20,11 +20,12 @@ exclude = [
     "scripts",
     "aftman.toml",
     "selene.toml",
-    "selene_definitions.yml"
+    "selene_definitions.yml",
+    "game"
 ]
 
 [dependencies]
-jecs = "ukendio/jecs@0.6.0"
+jecs = "ukendio/jecs@0.9.0"
 replecs = "pepeeltoro41/replecs@0.0.2"
 jabby = "alicesaidhi/jabby@0.2.0"
 planck = "yetanotherclown/planck@0.2.0"
