@@ -1,7 +1,7 @@
 {
     "languageMode": "strict",
     "aliases": {
-        "packages": "./Packages/",
+        "packages": "./roblox_packages/",
         "revy": "./src/"
     }
 }

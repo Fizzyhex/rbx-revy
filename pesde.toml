@@ -1,0 +1,55 @@
+name = "fizzyhex/revy"
+version = "0.1.0"
+description = "bundle of ecs assets"
+authors = ["Fizzyhex"]
+repository = "https://github.com/Fizzyhex/rbx-revy"
+license = "MIT"
+includes = [
+  "pesde.toml",
+  "README.md",
+  "LICENSE",
+  "src/**/*.luau",
+]
+
+[target]
+environment = "roblox"
+build_files = ["dist"]
+lib = "dist/init.luau"
+
+[indices]
+default = "https://github.com/pesde-pkg/index"
+
+[scripts]
+roblox_sync_config_generator = ".pesde/scripts/roblox_sync_config_generator.luau"
+sourcemap_generator = ".pesde/scripts/sourcemap_generator.luau"
+
+[dev_dependencies]
+scripts = { name = "pesde/scripts_rojo", version = "^0.2.0", target = "lune" }
+rojo = { name = "pesde/rojo", version = "^7.5.1", target = "lune" }
+
+[engines]
+pesde = "^0.7.0"
+lune = "^0.10.2"
+
+[wally_indices]
+default = "https://github.com/UpliftGames/wally-index"
+
+[place]
+shared = "game.ReplicatedStorage.Packages"
+
+[dependencies]
+jecs = { wally = "ukendio/jecs", version = "0.9.0" }
+replecs = { wally = "pepeeltoro41/replecs", version = "^0.0.2" }
+jabby = { wally = "alicesaidhi/jabby", version = "^0.2.3" }
+planck = { wally = "yetanotherclown/planck", version = "^0.2.0" }
+planck_jabby = { wally = "yetanotherclown/planck-jabby", version = "^0.2.0" }
+planck_runservice = { wally = "yetanotherclown/planck-runservice", version = "^0.2.0" }
+rewire = { wally = "sayhisam1/rewire", version = "^0.3.0" }
+
+[overrides]
+"replecs>jecs" = { wally = "ukendio/jecs", version = "0.9.0" }
+"jabby>jecs" = { wally = "ukendio/jecs", version = "0.9.0" }
+"planck>jecs" = { wally = "ukendio/jecs", version = "0.9.0" }
+"planck-jabby>jecs" = { wally = "ukendio/jecs", version = "0.9.0" }
+"planck-runservice>jecs" = { wally = "ukendio/jecs", version = "0.9.0" }
+"rewire>jecs" = { wally = "ukendio/jecs", version = "0.9.0" }

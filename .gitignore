@@ -15,3 +15,8 @@ sourcemap.json
 # Darklua output
 /dist
 /game/dist/
+
+# Psede
+/luau_packages
+/lune_packages
+/roblox_packages
