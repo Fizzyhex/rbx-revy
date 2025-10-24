@@ -2,9 +2,11 @@ local ContextActionService = game:GetService("ContextActionService")
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 
+local make_jabby_remotes = require("@self/make_jabby_remotes")
+
 do
 	if RunService:IsServer() and not ReplicatedStorage:FindFirstChild("JABBY_REMOTES") then
-		script.JABBY_REMOTES.Parent = ReplicatedStorage
+		make_jabby_remotes().Parent = ReplicatedStorage
 	end
 end
 

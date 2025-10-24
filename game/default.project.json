@@ -8,11 +8,7 @@
                 "$path": "../roblox_packages",
 
                 "revy": {
-                    "$path": "../dist/",
-
-                    "JABBY_REMOTES": {
-                        "$path": "../src/JABBY_REMOTES.rbxmx"
-                    }
+                    "$path": "../dist/"
                 }
             },
 

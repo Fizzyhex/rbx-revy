@@ -1,5 +1,5 @@
 name = "fizzyhex/revy"
-version = "0.2.0"
+version = "0.5.0"
 description = "bundle of ecs assets"
 authors = ["Fizzyhex"]
 repository = "https://github.com/Fizzyhex/rbx-revy"
@@ -8,8 +8,7 @@ includes = [
   "pesde.toml",
   "README.md",
   "LICENSE",
-  "src/**/*.luau",
-  "src/JabbyRemotes.rbxmx",
+  "dist/**/*.luau"
 ]
 
 [target]
