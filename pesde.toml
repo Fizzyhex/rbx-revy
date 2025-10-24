@@ -9,6 +9,7 @@ includes = [
   "README.md",
   "LICENSE",
   "src/**/*.luau",
+  "src/JabbyRemotes.rbxmx",
 ]
 
 [target]
@@ -40,16 +41,19 @@ shared = "game.ReplicatedStorage.Packages"
 [dependencies]
 jecs = { wally = "ukendio/jecs", version = "0.9.0" }
 replecs = { wally = "pepeeltoro41/replecs", version = "^0.0.2" }
-jabby = { wally = "alicesaidhi/jabby", version = "^0.2.3" }
+jabby = { wally = "alicesaidhi/jabby", version = "^0.4.0" }
 planck = { wally = "yetanotherclown/planck", version = "^0.2.0" }
 planck_jabby = { wally = "yetanotherclown/planck-jabby", version = "^0.2.0" }
 planck_runservice = { wally = "yetanotherclown/planck-runservice", version = "^0.2.0" }
 rewire = { wally = "sayhisam1/rewire", version = "^0.3.0" }
 
 [overrides]
-"replecs>jecs" = { wally = "ukendio/jecs", version = "0.9.0" }
-"jabby>jecs" = { wally = "ukendio/jecs", version = "0.9.0" }
-"planck>jecs" = { wally = "ukendio/jecs", version = "0.9.0" }
-"planck-jabby>jecs" = { wally = "ukendio/jecs", version = "0.9.0" }
-"planck-runservice>jecs" = { wally = "ukendio/jecs", version = "0.9.0" }
-"rewire>jecs" = { wally = "ukendio/jecs", version = "0.9.0" }
+"replecs>jecs" = "jecs"
+"jabby>jecs" = "jecs"
+"planck>jecs" = "jecs"
+"planck_jabby>jecs" = "jecs"
+"planck_runservice>jecs" = "jecs"
+
+"planck>jabby" = "jabby"
+"planck_jabby>jabby" = "jabby"
+"planck_runservice>jabby" = "jabby"

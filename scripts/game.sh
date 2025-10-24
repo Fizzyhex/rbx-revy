@@ -5,8 +5,8 @@
 set -e
 
 # If Packages aren't installed, install them.
-if [ ! -d "Packages" ]; then
-    sh scripts/install-packages.sh
+if [ ! -d "roblox_packages" ]; then
+    sh psede install
 fi
 
 darklua process --config .darklua.json src/ dist/

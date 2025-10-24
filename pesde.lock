@@ -10,27 +10,37 @@ wally = "wally#ukendio/jecs"
 version = "^0.9.0"
 index = "default"
 
+[overrides."planck>jabby"]
+wally = "wally#alicesaidhi/jabby"
+version = "^0.4.0"
+index = "default"
+
 [overrides."planck>jecs"]
 wally = "wally#ukendio/jecs"
 version = "^0.9.0"
 index = "default"
 
-[overrides."planck-jabby>jecs"]
+[overrides."planck_jabby>jabby"]
+wally = "wally#alicesaidhi/jabby"
+version = "^0.4.0"
+index = "default"
+
+[overrides."planck_jabby>jecs"]
 wally = "wally#ukendio/jecs"
 version = "^0.9.0"
 index = "default"
 
-[overrides."planck-runservice>jecs"]
+[overrides."planck_runservice>jabby"]
+wally = "wally#alicesaidhi/jabby"
+version = "^0.4.0"
+index = "default"
+
+[overrides."planck_runservice>jecs"]
 wally = "wally#ukendio/jecs"
 version = "^0.9.0"
 index = "default"
 
 [overrides."replecs>jecs"]
-wally = "wally#ukendio/jecs"
-version = "^0.9.0"
-index = "default"
-
-[overrides."rewire>jecs"]
 wally = "wally#ukendio/jecs"
 version = "^0.9.0"
 index = "default"
@@ -159,34 +169,20 @@ pathfs = [{ name = "jiwonz/pathfs", version = "^0.6.0", index = "https://github.
 result = [{ name = "lukadev_0/result", version = "^1.2.1", index = "https://github.com/pesde-pkg/index" }, "peer"]
 unzip = [{ name = "0x5eal/unzip", version = "^0.2.0", index = "https://github.com/pesde-pkg/index", target = "luau" }, "standard"]
 
-[graph."wally#alicesaidhi/jabby@0.2.3 roblox"]
-direct = ["jabby", { wally = "wally#alicesaidhi/jabby", version = "^0.2.3", index = "default" }, "standard"]
+[graph."wally#alicesaidhi/jabby@0.4.0 roblox"]
+direct = ["jabby", { wally = "wally#alicesaidhi/jabby", version = "^0.4.0", index = "default" }, "standard"]
 
-[graph."wally#alicesaidhi/jabby@0.2.3 roblox".dependencies]
+[graph."wally#alicesaidhi/jabby@0.4.0 roblox".dependencies]
 jecs = ["wally#ukendio/jecs@0.9.0 roblox", "standard"]
 pebble = ["wally#alicesaidhi/pebble@0.1.2 roblox", "standard"]
 vide = ["wally#centau/vide@0.3.1 roblox", "standard"]
 
-[graph."wally#alicesaidhi/jabby@0.2.3 roblox".pkg_ref]
+[graph."wally#alicesaidhi/jabby@0.4.0 roblox".pkg_ref]
 ref_ty = "wally"
 index_url = "https://github.com/UpliftGames/wally-index"
 
-[graph."wally#alicesaidhi/jabby@0.2.3 roblox".pkg_ref.dependencies]
-jecs = [{ wally = "wally#ukendio/jecs", version = ">=0.6.0, <0.7.0", index = "https://github.com/UpliftGames/wally-index" }, "standard"]
-pebble = [{ wally = "wally#alicesaidhi/pebble", version = ">=0.1.2, <0.2.0", index = "https://github.com/UpliftGames/wally-index" }, "standard"]
-vide = [{ wally = "wally#centau/vide", version = ">=0.3.1, <0.4.0", index = "https://github.com/UpliftGames/wally-index" }, "standard"]
-
-[graph."wally#alicesaidhi/jabby@0.3.1 roblox".dependencies]
-jecs = ["wally#ukendio/jecs@0.8.3 roblox", "standard"]
-pebble = ["wally#alicesaidhi/pebble@0.1.2 roblox", "standard"]
-vide = ["wally#centau/vide@0.3.1 roblox", "standard"]
-
-[graph."wally#alicesaidhi/jabby@0.3.1 roblox".pkg_ref]
-ref_ty = "wally"
-index_url = "https://github.com/UpliftGames/wally-index"
-
-[graph."wally#alicesaidhi/jabby@0.3.1 roblox".pkg_ref.dependencies]
-jecs = [{ wally = "wally#ukendio/jecs", version = ">=0.8.1, <0.9.0", index = "https://github.com/UpliftGames/wally-index" }, "standard"]
+[graph."wally#alicesaidhi/jabby@0.4.0 roblox".pkg_ref.dependencies]
+jecs = [{ wally = "wally#ukendio/jecs", version = ">=0.9.0, <0.10.0", index = "https://github.com/UpliftGames/wally-index" }, "standard"]
 pebble = [{ wally = "wally#alicesaidhi/pebble", version = ">=0.1.2, <0.2.0", index = "https://github.com/UpliftGames/wally-index" }, "standard"]
 vide = [{ wally = "wally#centau/vide", version = ">=0.3.1, <0.4.0", index = "https://github.com/UpliftGames/wally-index" }, "standard"]
 
@@ -224,10 +220,6 @@ direct = ["rewire", { wally = "wally#sayhisam1/rewire", version = "^0.3.0", inde
 ref_ty = "wally"
 index_url = "https://github.com/UpliftGames/wally-index"
 
-[graph."wally#ukendio/jecs@0.8.3 roblox".pkg_ref]
-ref_ty = "wally"
-index_url = "https://github.com/UpliftGames/wally-index"
-
 [graph."wally#ukendio/jecs@0.9.0 roblox"]
 direct = ["jecs", { wally = "wally#ukendio/jecs", version = "^0.9.0", index = "default" }, "standard"]
 
@@ -250,7 +242,7 @@ JestGlobals = [{ wally = "wally#jsdotlua/jest-globals", version = ">=3.6.1-rc.2,
 direct = ["planck_jabby", { wally = "wally#yetanotherclown/planck-jabby", version = "^0.2.0", index = "default" }, "standard"]
 
 [graph."wally#yetanotherclown/planck-jabby@0.2.0 roblox".dependencies]
-Jabby = ["wally#alicesaidhi/jabby@0.3.1 roblox", "standard"]
+Jabby = ["wally#alicesaidhi/jabby@0.4.0 roblox", "standard"]
 
 [graph."wally#yetanotherclown/planck-jabby@0.2.0 roblox".pkg_ref]
 ref_ty = "wally"

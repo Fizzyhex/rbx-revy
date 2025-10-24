@@ -1,5 +1,10 @@
 local revy = require("@revy")
 local game_components = require("./game_components")
-local rotator_plugin = require("./rotator_plugin")
+local rotator_plugin = require("./plugins/rotator_plugin")
 
-revy.app():add_plugin(rotator_plugin):network_components(game_components):bind_debugger(Enum.KeyCode.Q):run()
+revy.app()
+	:add_plugin(rotator_plugin)
+	:network_components(game_components)
+	:bind_debugger(Enum.KeyCode.Q)
+	:enable_hot_reloading(script.Parent.plugins)
+	:run()

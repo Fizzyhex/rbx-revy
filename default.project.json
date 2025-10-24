@@ -2,6 +2,14 @@
     "name": "revy",
     "emitLegacyScripts": false,
     "tree": {
-        "$path": "dist/"
+        "$path": "roblox_packages",
+
+        "revy": {
+            "$path": "dist/",
+
+            "JABBY_REMOTES": {
+                "$path": "src/JABBY_REMOTES.rbxmx"
+            }
+        }
     }
 }

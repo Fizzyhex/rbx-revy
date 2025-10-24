@@ -5,10 +5,14 @@
         "$className": "DataModel",
         "ReplicatedStorage": {
             "packages": {
-                "$path": "../roblox_packages/",
+                "$path": "../roblox_packages",
 
                 "revy": {
-                    "$path": "../dist/"
+                    "$path": "../dist/",
+
+                    "JABBY_REMOTES": {
+                        "$path": "../src/JABBY_REMOTES.rbxmx"
+                    }
                 }
             },
 

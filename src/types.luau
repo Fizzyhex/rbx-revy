@@ -17,8 +17,7 @@ export type Resource<T = any> = string & { __T: T }
 
 export type RevyApp<App = {}> = App & {
 	world: jecs.World,
-	client_replicator: replecs.Client,
-	server_replicator: replecs.Server,
+	network: replecs.ReplecsLib,
 	add_systems: (self: RevyApp<App>, schedule: Schedule, ...System) -> RevyApp<App>,
 	open_debugger: (self: RevyApp<App>) -> RevyApp<App>,
 	bind_debugger: (self: RevyApp<App>, key: Enum.KeyCode) -> RevyApp<App>,
