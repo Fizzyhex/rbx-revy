@@ -2,11 +2,6 @@
     "process": [
         {
             "rule": "inject_global_value",
-            "identifier": "__DEV__",
-            "env": "ROBLOX_DEV"
-        },
-        {
-            "rule": "inject_global_value",
             "identifier": "PACKAGE_NAME",
             "value": "revy"
         },
