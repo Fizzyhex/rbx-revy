@@ -55,8 +55,6 @@ local schedule_phase_map = {
 	start = planck.Phase.Startup,
 }
 
-local FRESH_TAG = "___revy_fresh"
-
 local updates_interval = interval(1 / 20)
 local unreliables_interval = interval(1 / 30)
 
@@ -110,8 +108,11 @@ function revy.app()
 		return resources[resource :: any] :: any
 	end
 
-	function app:add_plugin(plugin: Plugin)
-		table.insert(plugins, plugin)
+	function app:add_plugins(...)
+		for _, plugin in { ... } do
+			table.insert(plugins, plugin)
+		end
+
 		return self
 	end
 
@@ -286,7 +287,7 @@ function revy.app()
 		return self
 	end
 
-	app:add_plugin(revy.time_plugin)
+	app:add_plugins(revy.time_plugin)
 
 	return app
 end

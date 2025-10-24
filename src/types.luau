@@ -27,7 +27,7 @@ export type RevyApp<App = {}> = App & {
 
 -- Anything that can only happen before an app is ran goes here
 export type RevyAppCommands = RevyApp<{
-	add_plugin: (self: RevyAppCommands, plugin: Plugin) -> RevyAppCommands,
+	add_plugins: (self: RevyAppCommands, ...Plugin) -> RevyAppCommands,
 	enable_hot_reloading: (self: RevyAppCommands, container: Instance) -> RevyAppCommands,
 
 	--[=[
