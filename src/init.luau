@@ -61,7 +61,7 @@ export type RevyApp = types.RevyApp<{}>
 export type RevyAppCommands = types.RevyAppCommands
 export type System = types.System
 export type Schedule = types.Schedule
-export type Plugin = types.Plugin
+export type Plugin = types.Plugin<RevyApp>
 export type Resource<T = any> = types.Resource<T>
 
 local schedule_phase_map = {
