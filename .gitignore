@@ -20,3 +20,6 @@ sourcemap.json
 /luau_packages
 /lune_packages
 /roblox_packages
+
+# Luau language server
+/trace.json

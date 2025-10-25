@@ -1,5 +1,5 @@
 name = "fizzyhex/revy"
-version = "0.5.9"
+version = "0.6.0"
 description = "Experimental bundle of ECS tooling"
 authors = ["Fizzyhex"]
 repository = "https://github.com/Fizzyhex/rbx-revy"

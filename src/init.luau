@@ -10,13 +10,28 @@ do
 	end
 end
 
+local jabby, planck, planck_jabby, planck_run_service, rewire
+
+if not _G.REVY_OPTIMISE_REQUIRES then
+	jabby = require("@packages/jabby")
+	planck = require("@packages/planck")
+	planck_jabby = require("@packages/planck_jabby")
+	planck_run_service = require("@packages/planck_runservice")
+	rewire = require("@packages/rewire")
+else
+	local roblox_packages = (script :: any).Parent.roblox_packages
+	local untyped_require = require :: any
+
+	jabby = untyped_require(roblox_packages.jabby)
+	planck = untyped_require(roblox_packages.planck)
+	planck_jabby = untyped_require(roblox_packages.planck_jabby)
+	planck_run_service = untyped_require(roblox_packages.planck_runservice)
+	rewire = untyped_require(roblox_packages.rewire)
+end
+
 local replecs = require("@packages/replecs")
-local jabby = require("@packages/jabby")
 local jecs = require("@packages/jecs")
-local planck = require("@packages/planck")
-local planck_jabby = require("@packages/planck_jabby")
-local planck_run_service = require("@packages/planck_runservice")
-local rewire = require("@packages/rewire")
+
 local collect = require("@self/collect")
 local interval = require("@self/interval")
 local new_plugin = require("@self/new_plugin")
