@@ -4,13 +4,13 @@ local replecs = require("@packages/replecs")
 
 export type SystemFn = planck.SystemFn<>
 
-export type PluginBuildFn = (app: RevyApp) -> ()
+export type PluginBuildFn<T> = (app: T) -> ()
 
 export type System = { type: "revy_system", id: string, system: SystemFn }
 
-export type Plugin = {
+export type Plugin<App> = {
 	type: "revy_plugin",
-	build: PluginBuildFn,
+	build: PluginBuildFn<App>,
 }
 
 export type Resource<T = any> = string & { __T: T }
@@ -27,7 +27,7 @@ export type RevyApp<App = {}> = App & {
 
 -- Anything that can only happen before an app is ran goes here
 export type RevyAppCommands = RevyApp<{
-	add_plugins: (self: RevyAppCommands, ...Plugin) -> RevyAppCommands,
+	add_plugins: (self: RevyAppCommands, ...Plugin<RevyApp>) -> RevyAppCommands,
 	enable_hot_reloading: (self: RevyAppCommands, container: Instance) -> RevyAppCommands,
 
 	--[=[
