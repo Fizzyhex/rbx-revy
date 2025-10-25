@@ -38,7 +38,7 @@ default = "https://github.com/UpliftGames/wally-index"
 shared = "game.ReplicatedStorage.Packages"
 
 [dependencies]
-jecs = { name = "marked/jecs", version = "^0.9.0" } # mirror of the wally package
+jecs = { wally = "ukendio/jecs", version = "0.9.0" }
 replecs = { wally = "pepeeltoro41/replecs", version = "^0.0.2" }
 planck = { wally = "yetanotherclown/planck", version = "^0.2.0" }
 planck_jabby = { wally = "yetanotherclown/planck-jabby", version = "^0.2.0" }
@@ -49,6 +49,19 @@ jabby = { name = "alicesaidhi/jabby", version = "^0.4.0-test.0" }
 [overrides]
 "replecs>jecs" = "jecs"
 "jabby>jecs" = "jecs"
+
+# T_T
+"jabby_core>jecs" = "jecs"
+"jabby_ecs_registry>jecs" = "jecs"
+"jabby_ecs_registry_ecr>jecs" = "jecs"
+"jabby_ecs_registry_jecs>jecs" = "jecs"
+"jabby_home>jecs" = "jecs"
+"jabby_net>jecs" = "jecs"
+"jabby_query_parser>jecs" = "jecs"
+"jabby_types>jecs" = "jecs"
+"jabby_ui>jecs" = "jecs"
+"jabby_util>jecs" = "jecs"
+
 "planck>jecs" = "jecs"
 "planck_jabby>jecs" = "jecs"
 "planck_runservice>jecs" = "jecs"
