@@ -19,7 +19,7 @@ if not _G.REVY_OPTIMISE_REQUIRES then
 	planck_run_service = require("@packages/planck_runservice")
 	rewire = require("@packages/rewire")
 else
-	local roblox_packages = (script :: any).Parent.roblox_packages
+	local roblox_packages = script.Parent.roblox_packages
 	local untyped_require = require :: any
 
 	jabby = untyped_require(roblox_packages.jabby)
