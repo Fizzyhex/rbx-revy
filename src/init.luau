@@ -53,6 +53,8 @@ local schedule_phase_map = {
 	update = planck_run_service.Phases.PostSimulation,
 	pre_render = planck_run_service.Phases.PreRender,
 	start = planck.Phase.Startup,
+	last = planck_run_service.Phases.Last,
+	first = planck_run_service.Phases.First,
 }
 
 local updates_interval = interval(1 / 20)

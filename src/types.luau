@@ -50,7 +50,7 @@ export type RevyAppCommands = RevyApp<{
 	run: (self: RevyAppCommands) -> RevyApp,
 }>
 
-export type Schedule = "update" | "pre_render" | "start"
+export type Schedule = "update" | "pre_render" | "start" | "last" | "first"
 
 --- Default components
 

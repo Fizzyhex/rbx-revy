@@ -1,5 +1,5 @@
 name = "fizzyhex/revy"
-version = "0.5.6"
+version = "0.5.9"
 description = "Experimental bundle of ECS tooling"
 authors = ["Fizzyhex"]
 repository = "https://github.com/Fizzyhex/rbx-revy"
@@ -44,23 +44,11 @@ planck = { wally = "yetanotherclown/planck", version = "^0.2.0" }
 planck_jabby = { wally = "yetanotherclown/planck-jabby", version = "^0.2.0" }
 planck_runservice = { wally = "yetanotherclown/planck-runservice", version = "^0.2.0" }
 rewire = { wally = "sayhisam1/rewire", version = "^0.3.0" }
-jabby = { name = "alicesaidhi/jabby", version = "^0.4.0-test.0" }
+jabby = { wally = "alicesaidhi/jabby", version = "^0.4.0" }
 
 [overrides]
 "replecs>jecs" = "jecs"
 "jabby>jecs" = "jecs"
-
-# T_T
-"jabby_core>jecs" = "jecs"
-"jabby_ecs_registry>jecs" = "jecs"
-"jabby_ecs_registry_ecr>jecs" = "jecs"
-"jabby_ecs_registry_jecs>jecs" = "jecs"
-"jabby_home>jecs" = "jecs"
-"jabby_net>jecs" = "jecs"
-"jabby_query_parser>jecs" = "jecs"
-"jabby_types>jecs" = "jecs"
-"jabby_ui>jecs" = "jecs"
-"jabby_util>jecs" = "jecs"
 
 "planck>jecs" = "jecs"
 "planck_jabby>jecs" = "jecs"

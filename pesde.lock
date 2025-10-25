@@ -2,7 +2,7 @@
 # It is not intended for manual editing.
 format = 2
 name = "fizzyhex/revy"
-version = "0.5.6"
+version = "0.5.8"
 target = "roblox"
 
 [overrides."jabby>jecs"]
@@ -10,59 +10,9 @@ wally = "wally#ukendio/jecs"
 version = "^0.9.0"
 index = "default"
 
-[overrides."jabby_core>jecs"]
-wally = "wally#ukendio/jecs"
-version = "^0.9.0"
-index = "default"
-
-[overrides."jabby_ecs_registry>jecs"]
-wally = "wally#ukendio/jecs"
-version = "^0.9.0"
-index = "default"
-
-[overrides."jabby_ecs_registry_ecr>jecs"]
-wally = "wally#ukendio/jecs"
-version = "^0.9.0"
-index = "default"
-
-[overrides."jabby_ecs_registry_jecs>jecs"]
-wally = "wally#ukendio/jecs"
-version = "^0.9.0"
-index = "default"
-
-[overrides."jabby_home>jecs"]
-wally = "wally#ukendio/jecs"
-version = "^0.9.0"
-index = "default"
-
-[overrides."jabby_net>jecs"]
-wally = "wally#ukendio/jecs"
-version = "^0.9.0"
-index = "default"
-
-[overrides."jabby_query_parser>jecs"]
-wally = "wally#ukendio/jecs"
-version = "^0.9.0"
-index = "default"
-
-[overrides."jabby_types>jecs"]
-wally = "wally#ukendio/jecs"
-version = "^0.9.0"
-index = "default"
-
-[overrides."jabby_ui>jecs"]
-wally = "wally#ukendio/jecs"
-version = "^0.9.0"
-index = "default"
-
-[overrides."jabby_util>jecs"]
-wally = "wally#ukendio/jecs"
-version = "^0.9.0"
-index = "default"
-
 [overrides."planck>jabby"]
-name = "alicesaidhi/jabby"
-version = "^0.4.0-test.0"
+wally = "wally#alicesaidhi/jabby"
+version = "^0.4.0"
 index = "default"
 
 [overrides."planck>jecs"]
@@ -71,8 +21,8 @@ version = "^0.9.0"
 index = "default"
 
 [overrides."planck_jabby>jabby"]
-name = "alicesaidhi/jabby"
-version = "^0.4.0-test.0"
+wally = "wally#alicesaidhi/jabby"
+version = "^0.4.0"
 index = "default"
 
 [overrides."planck_jabby>jecs"]
@@ -81,8 +31,8 @@ version = "^0.9.0"
 index = "default"
 
 [overrides."planck_runservice>jabby"]
-name = "alicesaidhi/jabby"
-version = "^0.4.0-test.0"
+wally = "wally#alicesaidhi/jabby"
+version = "^0.4.0"
 index = "default"
 
 [overrides."planck_runservice>jecs"]
@@ -105,168 +55,6 @@ dirs = [{ name = "jiwonz/dirs", version = "^0.6.0", index = "https://github.com/
 frktest = [{ name = "itsfrank/frktest", version = "^0.0.4", index = "https://github.com/pesde-pkg/index" }, "dev"]
 luau-lsp = [{ name = "pesde/luau_lsp", version = "=1.53.2", index = "https://github.com/pesde-pkg/index", target = "lune" }, "dev"]
 stylua = [{ name = "pesde/stylua", version = "=2.1.0", index = "https://github.com/pesde-pkg/index", target = "lune" }, "dev"]
-
-[graph."alicesaidhi/jabby@0.4.0-test.0 roblox"]
-direct = ["jabby", { name = "alicesaidhi/jabby", version = "^0.4.0-test.0", index = "default" }, "standard"]
-
-[graph."alicesaidhi/jabby@0.4.0-test.0 roblox".dependencies]
-jabby_core = ["alicesaidhi/jabby_core@0.1.0-test.0 roblox", "standard"]
-jabby_ecs_registry_jecs = ["alicesaidhi/jabby_ecs_registry_jecs@0.1.0-test.0 roblox", "standard"]
-jabby_home = ["alicesaidhi/jabby_home@0.1.0-test.0 roblox", "standard"]
-jabby_net = ["alicesaidhi/jabby_net@0.1.0-test.0 roblox", "standard"]
-
-[graph."alicesaidhi/jabby@0.4.0-test.0 roblox".pkg_ref]
-ref_ty = "pesde"
-index_url = "https://github.com/pesde-pkg/index"
-
-[graph."alicesaidhi/jabby@0.4.0-test.0 roblox".pkg_ref.dependencies]
-jabby_core = [{ name = "alicesaidhi/jabby_core", version = "^0.1.0-test.0", index = "https://github.com/daimond113/pesde-index", target = "roblox" }, "standard"]
-jabby_ecs_registry_jecs = [{ name = "alicesaidhi/jabby_ecs_registry_jecs", version = "^0.1.0-test.0", index = "https://github.com/daimond113/pesde-index", target = "roblox" }, "standard"]
-jabby_home = [{ name = "alicesaidhi/jabby_home", version = "^0.1.0-test.0", index = "https://github.com/daimond113/pesde-index", target = "roblox" }, "standard"]
-jabby_net = [{ name = "alicesaidhi/jabby_net", version = "^0.1.0-test.0", index = "https://github.com/daimond113/pesde-index", target = "roblox" }, "standard"]
-
-[graph."alicesaidhi/jabby_core@0.1.0-test.0 roblox".dependencies]
-jabby_types = ["alicesaidhi/jabby_types@0.1.0-test.0 roblox", "standard"]
-
-[graph."alicesaidhi/jabby_core@0.1.0-test.0 roblox".pkg_ref]
-ref_ty = "pesde"
-index_url = "https://github.com/daimond113/pesde-index"
-
-[graph."alicesaidhi/jabby_core@0.1.0-test.0 roblox".pkg_ref.dependencies]
-jabby_types = [{ name = "alicesaidhi/jabby_types", version = "^0.1.0-test.0", index = "https://github.com/daimond113/pesde-index", target = "roblox" }, "standard"]
-
-[graph."alicesaidhi/jabby_ecs_registry@0.1.0-test.0 roblox".dependencies]
-gt = ["corecii/greentea@0.4.11 roblox", "standard"]
-jabby_core = ["alicesaidhi/jabby_core@0.1.0-test.0 roblox", "standard"]
-jabby_net = ["alicesaidhi/jabby_net@0.1.0-test.0 roblox", "standard"]
-jabby_query_parser = ["alicesaidhi/jabby_query_parser@0.1.0-test.0 roblox", "standard"]
-jabby_types = ["alicesaidhi/jabby_types@0.1.0-test.0 roblox", "standard"]
-jabby_ui = ["alicesaidhi/jabby_ui@0.1.0-test.0 roblox", "standard"]
-jabby_util = ["alicesaidhi/jabby_util@0.1.0-test.0 roblox", "standard"]
-vide = ["alicesaidhi/vide@0.4.1-testing.4 roblox", "standard"]
-
-[graph."alicesaidhi/jabby_ecs_registry@0.1.0-test.0 roblox".pkg_ref]
-ref_ty = "pesde"
-index_url = "https://github.com/daimond113/pesde-index"
-
-[graph."alicesaidhi/jabby_ecs_registry@0.1.0-test.0 roblox".pkg_ref.dependencies]
-gt = [{ name = "corecii/greentea", version = "^0.4.11", index = "https://github.com/daimond113/pesde-index" }, "standard"]
-jabby_core = [{ name = "alicesaidhi/jabby_core", version = "^0.1.0-test.0", index = "https://github.com/daimond113/pesde-index", target = "roblox" }, "standard"]
-jabby_net = [{ name = "alicesaidhi/jabby_net", version = "^0.1.0-test.0", index = "https://github.com/daimond113/pesde-index", target = "roblox" }, "standard"]
-jabby_query_parser = [{ name = "alicesaidhi/jabby_query_parser", version = "^0.1.0-test.0", index = "https://github.com/daimond113/pesde-index", target = "roblox" }, "standard"]
-jabby_types = [{ name = "alicesaidhi/jabby_types", version = "^0.1.0-test.0", index = "https://github.com/daimond113/pesde-index", target = "roblox" }, "standard"]
-jabby_ui = [{ name = "alicesaidhi/jabby_ui", version = "^0.1.0-test.0", index = "https://github.com/daimond113/pesde-index", target = "roblox" }, "standard"]
-jabby_util = [{ name = "alicesaidhi/jabby_util", version = "^0.1.0-test.0", index = "https://github.com/daimond113/pesde-index", target = "roblox" }, "standard"]
-vide = [{ name = "alicesaidhi/vide", version = "^0.4.1-test.4", index = "https://github.com/daimond113/pesde-index" }, "standard"]
-
-[graph."alicesaidhi/jabby_ecs_registry_jecs@0.1.0-test.0 roblox".dependencies]
-gt = ["corecii/greentea@0.4.11 roblox", "standard"]
-jabby_core = ["alicesaidhi/jabby_core@0.1.0-test.0 roblox", "standard"]
-jabby_ecs_registry = ["alicesaidhi/jabby_ecs_registry@0.1.0-test.0 roblox", "standard"]
-jabby_home = ["alicesaidhi/jabby_home@0.1.0-test.0 roblox", "standard"]
-jabby_query_parser = ["alicesaidhi/jabby_query_parser@0.1.0-test.0 roblox", "standard"]
-jabby_types = ["alicesaidhi/jabby_types@0.1.0-test.0 roblox", "standard"]
-jabby_ui = ["alicesaidhi/jabby_ui@0.1.0-test.0 roblox", "standard"]
-jabby_util = ["alicesaidhi/jabby_util@0.1.0-test.0 roblox", "standard"]
-jecs = ["wally#ukendio/jecs@0.7.3 roblox", "standard"]
-lua_preview_notation = ["alicesaidhi/lua_preview_notation@0.1.0-test.0 roblox", "standard"]
-vide = ["alicesaidhi/vide@0.4.1-testing.4 roblox", "standard"]
-
-[graph."alicesaidhi/jabby_ecs_registry_jecs@0.1.0-test.0 roblox".pkg_ref]
-ref_ty = "pesde"
-index_url = "https://github.com/daimond113/pesde-index"
-
-[graph."alicesaidhi/jabby_ecs_registry_jecs@0.1.0-test.0 roblox".pkg_ref.dependencies]
-gt = [{ name = "corecii/greentea", version = "^0.4.11", index = "https://github.com/daimond113/pesde-index" }, "standard"]
-jabby_core = [{ name = "alicesaidhi/jabby_core", version = "^0.1.0-test.0", index = "https://github.com/daimond113/pesde-index", target = "roblox" }, "standard"]
-jabby_ecs_registry = [{ name = "alicesaidhi/jabby_ecs_registry", version = "^0.1.0-test.0", index = "https://github.com/daimond113/pesde-index", target = "roblox" }, "standard"]
-jabby_home = [{ name = "alicesaidhi/jabby_home", version = "^0.1.0-test.0", index = "https://github.com/daimond113/pesde-index", target = "roblox" }, "standard"]
-jabby_query_parser = [{ name = "alicesaidhi/jabby_query_parser", version = "^0.1.0-test.0", index = "https://github.com/daimond113/pesde-index", target = "roblox" }, "standard"]
-jabby_types = [{ name = "alicesaidhi/jabby_types", version = "^0.1.0-test.0", index = "https://github.com/daimond113/pesde-index", target = "roblox" }, "standard"]
-jabby_ui = [{ name = "alicesaidhi/jabby_ui", version = "^0.1.0-test.0", index = "https://github.com/daimond113/pesde-index", target = "roblox" }, "standard"]
-jabby_util = [{ name = "alicesaidhi/jabby_util", version = "^0.1.0-test.0", index = "https://github.com/daimond113/pesde-index", target = "roblox" }, "standard"]
-jecs = [{ wally = "wally#ukendio/jecs", version = "^0.7.2", index = "https://github.com/UpliftGames/wally-index" }, "standard"]
-lua_preview_notation = [{ name = "alicesaidhi/lua_preview_notation", version = "^0.1.0-test.0", index = "https://github.com/daimond113/pesde-index", target = "roblox" }, "standard"]
-vide = [{ name = "alicesaidhi/vide", version = "^0.4.1-test.4", index = "https://github.com/daimond113/pesde-index" }, "standard"]
-
-[graph."alicesaidhi/jabby_home@0.1.0-test.0 roblox".dependencies]
-gt = ["corecii/greentea@0.4.11 roblox", "standard"]
-jabby_core = ["alicesaidhi/jabby_core@0.1.0-test.0 roblox", "standard"]
-jabby_net = ["alicesaidhi/jabby_net@0.1.0-test.0 roblox", "standard"]
-jabby_types = ["alicesaidhi/jabby_types@0.1.0-test.0 roblox", "standard"]
-jabby_ui = ["alicesaidhi/jabby_ui@0.1.0-test.0 roblox", "standard"]
-jabby_util = ["alicesaidhi/jabby_util@0.1.0-test.0 roblox", "standard"]
-vide = ["alicesaidhi/vide@0.4.1-testing.4 roblox", "standard"]
-
-[graph."alicesaidhi/jabby_home@0.1.0-test.0 roblox".pkg_ref]
-ref_ty = "pesde"
-index_url = "https://github.com/daimond113/pesde-index"
-
-[graph."alicesaidhi/jabby_home@0.1.0-test.0 roblox".pkg_ref.dependencies]
-gt = [{ name = "corecii/greentea", version = "^0.4.11", index = "https://github.com/daimond113/pesde-index" }, "standard"]
-jabby_core = [{ name = "alicesaidhi/jabby_core", version = "^0.1.0-test.0", index = "https://github.com/daimond113/pesde-index", target = "roblox" }, "standard"]
-jabby_net = [{ name = "alicesaidhi/jabby_net", version = "^0.1.0-test.0", index = "https://github.com/daimond113/pesde-index", target = "roblox" }, "standard"]
-jabby_types = [{ name = "alicesaidhi/jabby_types", version = "^0.1.0-test.0", index = "https://github.com/daimond113/pesde-index", target = "roblox" }, "standard"]
-jabby_ui = [{ name = "alicesaidhi/jabby_ui", version = "^0.1.0-test.0", index = "https://github.com/daimond113/pesde-index", target = "roblox" }, "standard"]
-jabby_util = [{ name = "alicesaidhi/jabby_util", version = "^0.1.0-test.0", index = "https://github.com/daimond113/pesde-index", target = "roblox" }, "standard"]
-vide = [{ name = "alicesaidhi/vide", version = "^0.4.1-test.4", index = "https://github.com/daimond113/pesde-index" }, "standard"]
-
-[graph."alicesaidhi/jabby_net@0.1.0-test.0 roblox".dependencies]
-gt = ["corecii/greentea@0.4.11 roblox", "standard"]
-jabby_types = ["alicesaidhi/jabby_types@0.1.0-test.0 roblox", "standard"]
-jabby_util = ["alicesaidhi/jabby_util@0.1.0-test.0 roblox", "standard"]
-
-[graph."alicesaidhi/jabby_net@0.1.0-test.0 roblox".pkg_ref]
-ref_ty = "pesde"
-index_url = "https://github.com/daimond113/pesde-index"
-
-[graph."alicesaidhi/jabby_net@0.1.0-test.0 roblox".pkg_ref.dependencies]
-gt = [{ name = "corecii/greentea", version = "^0.4.11", index = "https://github.com/daimond113/pesde-index" }, "standard"]
-jabby_types = [{ name = "alicesaidhi/jabby_types", version = "^0.1.0-test.0", index = "https://github.com/daimond113/pesde-index", target = "roblox" }, "standard"]
-jabby_util = [{ name = "alicesaidhi/jabby_util", version = "^0.1.0-test.0", index = "https://github.com/daimond113/pesde-index", target = "roblox" }, "standard"]
-jest = [{ wally = "wally#jsdotlua/jest", version = "^3.10.0", index = "https://github.com/UpliftGames/wally-index" }, "dev"]
-jest_globals = [{ wally = "wally#jsdotlua/jest-globals", version = "^3.10.0", index = "https://github.com/UpliftGames/wally-index" }, "dev"]
-promise = [{ wally = "wally#evaera/promise", version = "^4.0.0", index = "https://github.com/UpliftGames/wally-index" }, "dev"]
-
-[graph."alicesaidhi/jabby_query_parser@0.1.0-test.0 roblox".pkg_ref]
-ref_ty = "pesde"
-index_url = "https://github.com/daimond113/pesde-index"
-
-[graph."alicesaidhi/jabby_query_parser@0.1.0-test.0 roblox".pkg_ref.dependencies]
-gt = [{ name = "corecii/greentea", version = "^0.4.11", index = "https://github.com/daimond113/pesde-index" }, "dev"]
-jest = [{ wally = "wally#jsdotlua/jest", version = "^3.10.0", index = "https://github.com/UpliftGames/wally-index" }, "dev"]
-jest_globals = [{ wally = "wally#jsdotlua/jest-globals", version = "^3.10.0", index = "https://github.com/UpliftGames/wally-index" }, "dev"]
-
-[graph."alicesaidhi/jabby_types@0.1.0-test.0 roblox".pkg_ref]
-ref_ty = "pesde"
-index_url = "https://github.com/daimond113/pesde-index"
-
-[graph."alicesaidhi/jabby_ui@0.1.0-test.0 roblox".dependencies]
-vide = ["alicesaidhi/vide@0.4.1-testing.4 roblox", "standard"]
-
-[graph."alicesaidhi/jabby_ui@0.1.0-test.0 roblox".pkg_ref]
-ref_ty = "pesde"
-index_url = "https://github.com/daimond113/pesde-index"
-
-[graph."alicesaidhi/jabby_ui@0.1.0-test.0 roblox".pkg_ref.dependencies]
-ui_labs = [{ wally = "wally#pepeeltoro41/ui-labs", version = "^2.3.8", index = "https://github.com/upliftgames/wally-index" }, "dev"]
-vide = [{ name = "alicesaidhi/vide", version = "^0.4.1-test.4", index = "https://github.com/daimond113/pesde-index" }, "standard"]
-
-[graph."alicesaidhi/jabby_util@0.1.0-test.0 roblox".pkg_ref]
-ref_ty = "pesde"
-index_url = "https://github.com/daimond113/pesde-index"
-
-[graph."alicesaidhi/lua_preview_notation@0.1.0-test.0 roblox".pkg_ref]
-ref_ty = "pesde"
-index_url = "https://github.com/daimond113/pesde-index"
-
-[graph."alicesaidhi/vide@0.4.1-testing.4 roblox".pkg_ref]
-ref_ty = "pesde"
-index_url = "https://github.com/daimond113/pesde-index"
-
-[graph."corecii/greentea@0.4.11 roblox".pkg_ref]
-ref_ty = "pesde"
-index_url = "https://github.com/daimond113/pesde-index"
 
 [graph."jiwonz/dirs@0.6.0 lune".dependencies]
 greentea = ["jiwonz/greentea_luau@0.2.0 luau", "standard"]
@@ -381,6 +169,37 @@ pathfs = [{ name = "jiwonz/pathfs", version = "^0.6.0", index = "https://github.
 result = [{ name = "lukadev_0/result", version = "^1.2.1", index = "https://github.com/pesde-pkg/index" }, "peer"]
 unzip = [{ name = "0x5eal/unzip", version = "^0.2.0", index = "https://github.com/pesde-pkg/index", target = "luau" }, "standard"]
 
+[graph."wally#alicesaidhi/jabby@0.4.0 roblox"]
+direct = ["jabby", { wally = "wally#alicesaidhi/jabby", version = "^0.4.0", index = "default" }, "standard"]
+
+[graph."wally#alicesaidhi/jabby@0.4.0 roblox".dependencies]
+jecs = ["wally#ukendio/jecs@0.9.0 roblox", "standard"]
+pebble = ["wally#alicesaidhi/pebble@0.1.2 roblox", "standard"]
+vide = ["wally#centau/vide@0.3.1 roblox", "standard"]
+
+[graph."wally#alicesaidhi/jabby@0.4.0 roblox".pkg_ref]
+ref_ty = "wally"
+index_url = "https://github.com/UpliftGames/wally-index"
+
+[graph."wally#alicesaidhi/jabby@0.4.0 roblox".pkg_ref.dependencies]
+jecs = [{ wally = "wally#ukendio/jecs", version = ">=0.9.0, <0.10.0", index = "https://github.com/UpliftGames/wally-index" }, "standard"]
+pebble = [{ wally = "wally#alicesaidhi/pebble", version = ">=0.1.2, <0.2.0", index = "https://github.com/UpliftGames/wally-index" }, "standard"]
+vide = [{ wally = "wally#centau/vide", version = ">=0.3.1, <0.4.0", index = "https://github.com/UpliftGames/wally-index" }, "standard"]
+
+[graph."wally#alicesaidhi/pebble@0.1.2 roblox".dependencies]
+vide = ["wally#centau/vide@0.3.1 roblox", "standard"]
+
+[graph."wally#alicesaidhi/pebble@0.1.2 roblox".pkg_ref]
+ref_ty = "wally"
+index_url = "https://github.com/UpliftGames/wally-index"
+
+[graph."wally#alicesaidhi/pebble@0.1.2 roblox".pkg_ref.dependencies]
+vide = [{ wally = "wally#centau/vide", version = ">=0.3.1, <0.4.0", index = "https://github.com/UpliftGames/wally-index" }, "standard"]
+
+[graph."wally#centau/vide@0.3.1 roblox".pkg_ref]
+ref_ty = "wally"
+index_url = "https://github.com/UpliftGames/wally-index"
+
 [graph."wally#pepeeltoro41/replecs@0.0.2 roblox"]
 direct = ["replecs", { wally = "wally#pepeeltoro41/replecs", version = "^0.0.2", index = "default" }, "standard"]
 
@@ -398,10 +217,6 @@ jecs = [{ wally = "wally#ukendio/jecs", version = ">=0.8.3, <0.9.0", index = "ht
 direct = ["rewire", { wally = "wally#sayhisam1/rewire", version = "^0.3.0", index = "default" }, "standard"]
 
 [graph."wally#sayhisam1/rewire@0.3.0 roblox".pkg_ref]
-ref_ty = "wally"
-index_url = "https://github.com/UpliftGames/wally-index"
-
-[graph."wally#ukendio/jecs@0.7.3 roblox".pkg_ref]
 ref_ty = "wally"
 index_url = "https://github.com/UpliftGames/wally-index"
 
@@ -427,7 +242,7 @@ JestGlobals = [{ wally = "wally#jsdotlua/jest-globals", version = ">=3.6.1-rc.2,
 direct = ["planck_jabby", { wally = "wally#yetanotherclown/planck-jabby", version = "^0.2.0", index = "default" }, "standard"]
 
 [graph."wally#yetanotherclown/planck-jabby@0.2.0 roblox".dependencies]
-Jabby = ["alicesaidhi/jabby@0.4.0-test.0 roblox", "standard"]
+Jabby = ["wally#alicesaidhi/jabby@0.4.0 roblox", "standard"]
 
 [graph."wally#yetanotherclown/planck-jabby@0.2.0 roblox".pkg_ref]
 ref_ty = "wally"
