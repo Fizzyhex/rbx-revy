@@ -1,5 +1,5 @@
 name = "fizzyhex/revy"
-version = "0.5.3"
+version = "0.5.4"
 description = "Experimental bundle of ECS tooling"
 authors = ["Fizzyhex"]
 repository = "https://github.com/Fizzyhex/rbx-revy"
@@ -38,13 +38,13 @@ default = "https://github.com/UpliftGames/wally-index"
 shared = "game.ReplicatedStorage.Packages"
 
 [dependencies]
-jecs = { wally = "ukendio/jecs", version = "0.9.0" }
+jecs = { name = "marked/jecs", version = "^0.9.0" } # mirror of the wally package
 replecs = { wally = "pepeeltoro41/replecs", version = "^0.0.2" }
-jabby = { wally = "alicesaidhi/jabby", version = "^0.4.0" }
 planck = { wally = "yetanotherclown/planck", version = "^0.2.0" }
 planck_jabby = { wally = "yetanotherclown/planck-jabby", version = "^0.2.0" }
 planck_runservice = { wally = "yetanotherclown/planck-runservice", version = "^0.2.0" }
 rewire = { wally = "sayhisam1/rewire", version = "^0.3.0" }
+jabby = { name = "alicesaidhi/jabby", version = "^0.4.0-test.0" }
 
 [overrides]
 "replecs>jecs" = "jecs"
