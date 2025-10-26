@@ -1,0 +1,12 @@
+[components]
+Dialog = [ "hey!", "i'm a text entity", "this is all of my dialog. thank you for listening!" ]
+Renderer = ""
+
+[components.DialogRbx]
+ProximityPrompt = "HumanoidRootPart/ProximityPrompt"
+Sound = "HumanoidRootPart/dialog_pop"
+
+[pairs]
+# networking
+"replecs.reliable" = [ "Dialog", "DialogRbx", "Renderer" ]
+"replecs.unreliable" = [ "Transform" ]

@@ -17,7 +17,11 @@
             },
 
             "shared": {
-                "$path": "src"
+                "$path": "src",
+
+                "data": {
+                    "$path": "data"
+                }
             }
         }
     }

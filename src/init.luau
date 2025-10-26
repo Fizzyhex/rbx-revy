@@ -12,6 +12,8 @@ end
 
 local jabby, planck, planck_jabby, planck_run_service, rewire
 
+-- Darklua flag - lowers the amount of types that need to be loaded by the requirer for language
+-- server performance.
 if not _G.REVY_OPTIMISE_REQUIRES then
 	jabby = require("@packages/jabby")
 	planck = require("@packages/planck")
@@ -31,6 +33,8 @@ end
 
 local replecs = require("@packages/replecs")
 local jecs = require("@packages/jecs")
+local logger = require("@revy/log/logger")
+local text_entity_default_parsers = require("@revy/text_entity/text_entity_default_parsers")
 
 local collect = require("@self/collect")
 local interval = require("@self/interval")
@@ -80,6 +84,22 @@ local revy = { ecs = jecs }
 revy.plugin = new_plugin
 revy.collect = collect
 revy.interval = interval
+revy.exporters = text_entity_default_parsers
+
+local Export = jecs.component()
+local text_entity_util = require("@self/text_entity/text_entity_util")(Export)
+
+--[=[
+	Creates a new `Text Entity`.
+
+	Provide a name for improved logging.
+]=]
+function revy.text_entity(data: any, name: string?): types.TextEntityContext
+	return {
+		data = data,
+		name = name,
+	}
+end
 
 function revy.system(id: string, func: (world: jecs.World) -> ())
 	local system: types.System = { type = "revy_system", id = id, system = func :: SystemFn }
@@ -95,6 +115,8 @@ function revy.app()
 	local resources: { [any]: Resource } = {}
 
 	local system_map: { [string]: SystemFn } = {}
+	local plugin_cleanup_map: { [string]: () -> () } = {}
+
 	local had_first_load: { [string]: true } = {}
 
 	local hot_reloader = rewire.HotReloader.new()
@@ -103,16 +125,29 @@ function revy.app()
 	app.network = replecs.create()
 	app.world = jecs.world()
 
+	local parser_context = text_entity_util.new_parser_context(app.world, {
+		reliable = revy.reliable,
+		unreliable = revy.unreliable,
+	})
+
+	local function load_plugin(plugin: Plugin)
+		plugin_cleanup_map[plugin.id] = plugin.build(app)
+	end
+
 	local scheduler =
 		planck.Scheduler.new(app.world):addPlugin(planck_jabby.new()):addPlugin(planck_run_service.Plugin.new())
 
-	local function unload_associated_systems(plugin_id: string)
+	local function unload_plugin(plugin_id: string)
 		for map_id, map_system in system_map do
 			if map_id == plugin_id or map_id:match(`^{plugin_id}.`) then
-				print("| - Unloading system", map_id)
+				logger.lib_print(`{logger.TINY_TAB} - unloading system {map_id}`)
 				scheduler:removeSystem(map_system)
 				system_map[map_id] = nil
 			end
+		end
+
+		if plugin_cleanup_map[plugin_id] then
+			plugin_cleanup_map[plugin_id]()
 		end
 	end
 
@@ -123,6 +158,17 @@ function revy.app()
 
 	function app:get_resource<T>(resource: Resource<T>)
 		return resources[resource :: any] :: any
+	end
+
+	function app:load_text_entity(entity, text_entity: types.TextEntityContext, context)
+		text_entity_util.parse(
+			parser_context,
+			entity,
+			text_entity.data,
+			context,
+			{ [text_entity_util.LOG_TEXT_ENTITY_NAME] = text_entity.name }
+		)
+		return entity
 	end
 
 	function app:add_plugins(...)
@@ -140,8 +186,8 @@ function revy.app()
 
 		for _, module in { ... } do
 			if module.type ~= "revy_system" then
-				warn(
-					`module.type == {module.type} when it should == 'revy_system' - it's invalid and will not be loaded. Create systems with revy.system().`
+				logger.lib_warn(
+					`module.type == {module.type} --- it should == 'revy_system'.\n{logger.BULLET} it can't be loaded.\n{logger.BULLET} make sure you create systems with \`revy.system()\`.`
 				)
 				continue
 			end
@@ -170,6 +216,7 @@ function revy.app()
 		local entity_instance_map: { [Instance]: types.Renderer } = {}
 
 		app.world:added(revy.renderer, function(entity, _id, model)
+			logger.lib_print("mapping", entity, "to model", model)
 			entity_instance_map[model] = entity
 		end)
 
@@ -204,10 +251,10 @@ function revy.app()
 			end
 		end
 
-		revy.network_plugin.build(app)
+		load_plugin(revy.network_plugin)
 
 		for _, plugin in plugins do
-			plugin.build(app)
+			load_plugin(plugin)
 		end
 
 		return self
@@ -230,19 +277,21 @@ function revy.app()
 				local ok, system_or_plugin = pcall(require, module)
 
 				if not ok then
-					warn(`Hot reload failed - require({module:GetFullName()}) -> {system_or_plugin}`)
+					logger.lib_warn(`hot reload failed - require({module:GetFullName()}) -> {system_or_plugin}`)
 					return
 				end
 
 				if typeof(system_or_plugin) ~= "table" then
-					warn(`Hot reload failed - typeof(require({module:GetFullName()})) ~= table`)
+					logger.lib_warn(`hot reload failed - typeof(require({module:GetFullName()})) ~= table`)
 					return
 				end
 
 				local id = system_or_plugin.id
 
 				if typeof(id) ~= "string" then
-					warn(`Hot reload failed - require({module:GetFullName()}).id == {id} - expected string`)
+					logger.lib_warn(
+						`hot reload failed - require({module:GetFullName()}).id == {id} --- expected string`
+					)
 					return
 				end
 
@@ -252,23 +301,23 @@ function revy.app()
 					return
 				end
 
-				print(`Unloading plugin {id}...`)
-				print("|----------------------")
-				unload_associated_systems(id)
+				logger.lib_print(`Unloading plugin {id}...`)
+				logger.lib_print("|----------------------")
+				unload_plugin(id)
 
 				if system_or_plugin.type == "revy_plugin" then
-					print(`| + Loading plugin {id}...`)
-					print("|----------------------")
-					print(`|*log for {id} here`)
-					system_or_plugin.build(app)
-					print("|----------------------")
-					print("|✅ Done!")
+					logger.lib_print(`| + loading plugin {id}...`)
+					logger.lib_print("|----------------------")
+					logger.lib_print(`|*log for {id} here`)
+					load_plugin(system_or_plugin)
+					logger.lib_print("|----------------------")
+					logger.lib_print("|✅ Done!")
 				elseif system_or_plugin.type == "revy_system" then
-					warn(
-						`Systems cannot be hot reloaded currently - use revy.plugin instead of revy.system.\n(Source: {id} @ {module:GetFullName()})`
+					logger.lib_warn(
+						`systems cannot be hot reloaded currently - use revy.plugin instead of revy.system.\n(source: {id} @ {module:GetFullName()})`
 					)
 				else
-					warn(
+					logger.lib_warn(
 						`require({module:GetFullName()}).type hasn't been identified as a revy plugin or system. No loading will occur.`
 					)
 				end
@@ -280,11 +329,13 @@ function revy.app()
 				local ok, system_or_plugin = pcall(require, module)
 
 				if not ok then
-					warn(`require({module:GetFullName()}) failed - cannot unload system. Error: {system_or_plugin}`)
+					logger.lib_warn(
+						`require({module:GetFullName()}) failed - cannot unload system. error: {system_or_plugin}`
+					)
 					return
 				end
 
-				unload_associated_systems(system_or_plugin.id)
+				unload_plugin(system_or_plugin.id)
 			end)
 		end
 
@@ -294,8 +345,10 @@ function revy.app()
 	function app:network_components(components)
 		for name, component in components do
 			if not app.world:get(component, jecs.Name) then
-				warn(`Component '{name}' is missing jecs.Name metadata - it won't be networked correctly.`)
-				warn(`{_G.PACKAGE_NAME}.ecs.meta(component, {_G.PACKAGE_NAME}.ecs.Name, "Rotator")`)
+				logger.lib_warn(
+					`Component '{name}' is missing jecs.Name metadata - it won't be networked correctly.`
+						.. `\n{logger.TINY_TAB}{_G.PACKAGE_NAME}.ecs.meta(component, {_G.PACKAGE_NAME}.ecs.Name, "Rotator")`
+				)
 			end
 
 			app.world:add(component, replecs.shared)
@@ -309,11 +362,15 @@ function revy.app()
 	return app
 end
 
+revy.Export = Export
+
 local Renderer = jecs.component() :: types.Renderer
 jecs.meta(Renderer, jecs.Name, "Renderer")
+jecs.meta(Renderer, revy.Export, text_entity_default_parsers.path)
 
 local Transform = jecs.component() :: types.Transform
 jecs.meta(Transform, jecs.Name, "Transform")
+jecs.meta(Transform, revy.Export, text_entity_default_parsers.CFrame)
 
 revy.renderer = Renderer
 revy.transform = Transform
