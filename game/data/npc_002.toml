@@ -1,0 +1,15 @@
+tags = ["Prompt"]
+
+[components]
+Dialog = [
+    "i don't really speak in order",
+    "you never know what i'm gonna say next!",
+    "i'm just so spontaneous...",
+    "🐦 chirp"
+]
+PromptRbx = "HumanoidRootPart/ProximityPrompt"
+DialogRandomiser = {}
+
+[components.DialogEmitterRbx]
+sound = "HumanoidRootPart/dialog_pop"
+source = "Head"

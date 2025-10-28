@@ -1,3 +1,4 @@
+local replecs = require("@packages/.pesde/pepeeltoro41_replecs@0.0.2/replecs/src")
 local jecs = require("@packages/jecs")
 local logger = require("@revy/log/logger")
 
@@ -10,7 +11,7 @@ type ParserContext = {
 	world: jecs.World,
 	name_component_map: NameComponentMap,
 	component_parser_map: ComponentParserMap,
-	pairs: { [string]: any },
+	pairs: { [string]: unknown },
 }
 
 local function parse_component_data(
@@ -39,7 +40,7 @@ local function did_you_mean(logger_fn, parser_context: ParserContext, pair_name:
 	end
 end
 
-local global_parser_tag
+local global_parser_tag: jecs.Entity
 
 local text_entity_util = {}
 text_entity_util.LOG_TEXT_ENTITY_NAME = "text_entity_name"
@@ -77,7 +78,9 @@ function text_entity_util.parse(
 				continue
 			end
 
-			local ok, data = pcall(parse_component_data, parser_context, component, raw_data, context)
+			local ok, data = pcall(function()
+				return parse_component_data(parser_context, component, raw_data, context)
+			end)
 
 			if not ok then
 				local warn = logger.inject_variables(logger.lib_warn, logger_variables)
@@ -89,17 +92,6 @@ function text_entity_util.parse(
 			end
 
 			parser_context.world:set(entity, component, data)
-			logger.lib_print(
-				"insert component",
-				"entity:",
-				entity,
-				"component name:",
-				component_name,
-				"component:",
-				component,
-				"data:",
-				data
-			)
 		end
 	end
 
@@ -115,7 +107,7 @@ function text_entity_util.parse(
 			end
 
 			parser_context.world:add(entity, tag)
-			print("insert tag", entity, tag_name, tag)
+			--print("insert tag", entity, tag_name, tag)
 		end
 	end
 
@@ -150,18 +142,17 @@ function text_entity_util.parse(
 
 				if typeof(pair_with_name) == "string" then
 					parser_context.world:add(entity, jecs.pair(pair, pair_with))
-					print("insert pair", entity, pair_name, pair_with_name, pair, pair_with)
+					--print("insert pair", entity, pair_name, pair_with_name, pair, pair_with)
 				end
 			end
 		end
 	end
 end
 
-function text_entity_util.new_parser_context(world: jecs.World, pairs): ParserContext
+function text_entity_util.new_parser_context(world: jecs.World, custom_pairs): ParserContext
 	local name_component_map: NameComponentMap = {}
 
 	world:added(jecs.Name, function(_, component, name) -- (entity, id, data)
-		print("name added", _, component, name)
 		name_component_map[name] = component
 	end)
 
@@ -171,8 +162,7 @@ function text_entity_util.new_parser_context(world: jecs.World, pairs): ParserCo
 
 	local component_parser_map: ComponentParserMap = {}
 
-	world:added(global_parser_tag, function(_, component, parser) -- (entity, id, data)
-		print("parser added", _, component, parser)
+	world:added(global_parser_tag :: any, function(_, component, parser) -- (entity, id, data)
 		component_parser_map[component] = parser
 	end)
 
@@ -184,11 +174,11 @@ function text_entity_util.new_parser_context(world: jecs.World, pairs): ParserCo
 		world = world,
 		name_component_map = name_component_map,
 		component_parser_map = component_parser_map,
-		pairs = pairs,
+		pairs = custom_pairs,
 	}
 end
 
-return function(parser_tag)
+return function(parser_tag: jecs.Entity)
 	assert(not global_parser_tag, "there can only be one!")
 	global_parser_tag = parser_tag
 	return text_entity_util

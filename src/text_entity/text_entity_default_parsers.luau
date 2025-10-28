@@ -4,7 +4,7 @@ function text_entity_default_parsers.new_parser(func: (data: any, context: any) 
 	return func
 end
 
-function text_entity_default_parsers.CFrame(data): CFrame
+function text_entity_default_parsers.CFrame(data: any): CFrame
 	if typeof(data) ~= "table" then
 		return CFrame.identity
 	end
@@ -13,11 +13,17 @@ function text_entity_default_parsers.CFrame(data): CFrame
 		return CFrame.identity
 	end
 
-	if not data.orientation then
+	if data.orientation == nil then
 		return CFrame.new(Vector3.new(unpack(data.position)))
 	end
 
-	if typeof(data.orientation[1]) == "number" then
+	assert(
+		typeof(data.orientation == "table"),
+		"orientation must be an array of numbers. examples below:"
+			.. "- cframe = { position = [0, 0, 0], orientation = [0, 0, 0] }"
+	)
+
+	if (data.orientation :: { any })[1] == "number" then
 		local rx, ry, rz = unpack(data.orientation :: { number })
 		return CFrame.new(Vector3.new(unpack(data.position))) * CFrame.Angles(math.rad(rx), math.rad(ry), math.rad(rz))
 	end
@@ -25,16 +31,21 @@ function text_entity_default_parsers.CFrame(data): CFrame
 	error("Unrecognised format for CFrame")
 end
 
-function text_entity_default_parsers.Vector3(data): Vector3
+function text_entity_default_parsers.Vector3(data: any & { [any]: any }): Vector3
 	assert(
 		typeof(data) == "table",
 		"Vector3s must be arrays of numbers. Examples below.\nfield = [0, 5, 0]\nfield = [] # defaults to 0, 0, 0"
 	)
 
-	return Vector3.new(unpack(data))
+	if data.x then
+		return Vector3.new(data.x, data.y, data.z)
+	end
+
+	return Vector3.new(data[1], data[2], data[3])
 end
 
-function text_entity_default_parsers.path(path, context: Instance): Instance
+function text_entity_default_parsers.path(path: string, context: Instance): Instance
+	assert(typeof(path) == "string", "expected a string")
 	local current_instance: Instance? = context
 
 	if path:sub(1, 1) == "/" then

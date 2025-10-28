@@ -1,0 +1,10 @@
+tags:
+  - replecs.networked
+
+components:
+  Rotator: [ 0, 3, 0 ]
+
+pairs:
+  # networking
+  replecs.reliable:
+    Rotator

@@ -28,6 +28,8 @@ local function rotator_plugin(app: revy.RevyApp)
 			end
 		end)
 	)
+
+	return nil
 end
 
 return revy.plugin("game.rotator", rotator_plugin)

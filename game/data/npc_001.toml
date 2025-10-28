@@ -1,12 +1,15 @@
+tags = ["Prompt"]
+
 [components]
-Dialog = [ "hey!", "i'm a text entity", "this is all of my dialog. thank you for listening!" ]
-Renderer = ""
+Dialog = [
+    "hey!",
+    "i'm a text entity, a serialisable representation of an entity and its data.",
+    "my dialog was setup inside of a toml file.",
+    "this is all of my dialog. thank you for listening!",
+]
+PromptRbx = "HumanoidRootPart/ProximityPrompt"
+DialogCycler = { index = 1 }
 
-[components.DialogRbx]
-ProximityPrompt = "HumanoidRootPart/ProximityPrompt"
-Sound = "HumanoidRootPart/dialog_pop"
-
-[pairs]
-# networking
-"replecs.reliable" = [ "Dialog", "DialogRbx", "Renderer" ]
-"replecs.unreliable" = [ "Transform" ]
+[components.DialogEmitterRbx]
+sound = "HumanoidRootPart/dialog_pop"
+source = "Head"

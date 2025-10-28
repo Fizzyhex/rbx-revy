@@ -4,7 +4,10 @@ local revy = require("@revy")
 local game_components = require("../game_components")
 
 local TAG = "streamable"
-local container = script.Parent.Parent.data
+
+assert(script.Parent)
+assert(script.Parent.Parent)
+local container = script.Parent.Parent:WaitForChild("data")
 
 local function streamable_plugin(app: revy.RevyApp)
 	local to_collect = CollectionService:GetTagged(TAG)
@@ -37,7 +40,14 @@ local function streamable_plugin(app: revy.RevyApp)
 					continue
 				end
 
-				local text_entity = require(container:FindFirstChild(text_entity_name)) :: any
+				local module = container:FindFirstChild(text_entity_name)
+
+				if not module then
+					print("|- module not found")
+					continue
+				end
+
+				local text_entity = require(module) :: any
 				app:load_text_entity(entity, revy.text_entity(text_entity, text_entity_name), tagged)
 				world:set(entity, game_components.Transform, tagged:GetPivot())
 				world:set(entity, game_components.Renderer, tagged)
@@ -51,7 +61,7 @@ local function streamable_plugin(app: revy.RevyApp)
 				for entity, renderer in world:query(game_components.Renderer) do
 					if renderer == tagged then
 						world:delete(entity)
-						print("  done")
+						print("|- done")
 						return
 					end
 				end
@@ -60,6 +70,8 @@ local function streamable_plugin(app: revy.RevyApp)
 			end
 		end)
 	)
+
+	return nil
 end
 
 return revy.plugin("game.streamable", streamable_plugin)

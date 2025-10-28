@@ -4,7 +4,15 @@ local replecs = require("@packages/replecs")
 
 export type SystemFn = planck.SystemFn<>
 
-export type PluginBuildFn<T> = (app: T) -> ()
+export type Signal<T... = ...any> = {
+	Connect: (self: Signal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
+	ConnectParallel: (self: Signal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
+	Once: (self: Signal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
+	Wait: (self: Signal<T...>) -> T...,
+}
+
+type OptionalPluginCleanup = () -> ()?
+export type PluginBuildFn<T> = (app: T) -> OptionalPluginCleanup | never
 
 export type System = { type: "revy_system", id: string, system: SystemFn }
 
@@ -114,7 +122,7 @@ export type RevyAppCommands = RevyApp<{
 		revy:network_components(components)
 		```
 	]=]
-	network_components: (self: RevyAppCommands, components: { [string]: jecs.Entity }) -> RevyAppCommands,
+	network_components: (self: RevyAppCommands, components: {}) -> RevyAppCommands,
 
 	run: (self: RevyAppCommands) -> RevyApp,
 }>

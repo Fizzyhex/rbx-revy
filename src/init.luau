@@ -67,13 +67,14 @@ export type System = types.System
 export type Schedule = types.Schedule
 export type Plugin = types.Plugin<RevyApp>
 export type Resource<T = any> = types.Resource<T>
+export type Signal<T... = ...any> = types.Signal<T...>
 
 local schedule_phase_map = {
-	update = planck_run_service.Phases.PostSimulation,
-	pre_render = planck_run_service.Phases.PreRender,
 	start = planck.Phase.Startup,
-	last = planck_run_service.Phases.Last,
 	first = planck_run_service.Phases.First,
+	update = planck_run_service.Phases.Update,
+	last = planck_run_service.Phases.Last,
+	pre_render = planck_run_service.Phases.PreRender,
 }
 
 local updates_interval = interval(1 / 20)
@@ -107,7 +108,7 @@ function revy.system(id: string, func: (world: jecs.World) -> ())
 end
 
 function revy.resource<T>(id: string)
-	return (id :: any) :: T
+	return id :: any
 end
 
 function revy.app()
@@ -135,12 +136,12 @@ function revy.app()
 	end
 
 	local scheduler =
-		planck.Scheduler.new(app.world):addPlugin(planck_jabby.new()):addPlugin(planck_run_service.Plugin.new())
+		planck.Scheduler.new(app.world):addPlugin(planck_run_service.Plugin.new()):addPlugin(planck_jabby.new())
 
 	local function unload_plugin(plugin_id: string)
 		for map_id, map_system in system_map do
 			if map_id == plugin_id or map_id:match(`^{plugin_id}.`) then
-				logger.lib_print(`{logger.TINY_TAB} - unloading system {map_id}`)
+				print(`{logger.TINY_TAB} - unloading system {map_id}`)
 				scheduler:removeSystem(map_system)
 				system_map[map_id] = nil
 			end
@@ -252,6 +253,7 @@ function revy.app()
 		end
 
 		load_plugin(revy.network_plugin)
+		load_plugin(revy.frame_event_plugin)
 
 		for _, plugin in plugins do
 			load_plugin(plugin)
@@ -261,10 +263,13 @@ function revy.app()
 	end
 
 	function app:bind_debugger(key_code: Enum.KeyCode)
-		ContextActionService:BindAction("Open Debugger (Jabby)", function(_, state: Enum.UserInputState)
+		ContextActionService:BindAction("Open Debugger (Jabby)", function(_, state, _)
 			if state == Enum.UserInputState.Begin then
 				app:open_debugger()
+				return Enum.ContextActionResult.Sink
 			end
+
+			return Enum.ContextActionResult.Pass
 		end, false, key_code)
 
 		return self
@@ -274,7 +279,7 @@ function revy.app()
 	function app:enable_hot_reloading(...: Instance)
 		for _, container in { ... } do
 			hot_reloader:scan(container, function(module)
-				local ok, system_or_plugin = pcall(require, module)
+				local ok, system_or_plugin = pcall(require :: any, module)
 
 				if not ok then
 					logger.lib_warn(`hot reload failed - require({module:GetFullName()}) -> {system_or_plugin}`)
@@ -284,6 +289,10 @@ function revy.app()
 				if typeof(system_or_plugin) ~= "table" then
 					logger.lib_warn(`hot reload failed - typeof(require({module:GetFullName()})) ~= table`)
 					return
+				end
+
+				if system_or_plugin.plugin then
+					system_or_plugin = system_or_plugin.plugin
 				end
 
 				local id = system_or_plugin.id
@@ -302,16 +311,16 @@ function revy.app()
 				end
 
 				logger.lib_print(`Unloading plugin {id}...`)
-				logger.lib_print("|----------------------")
+				print("|----------------------")
 				unload_plugin(id)
 
 				if system_or_plugin.type == "revy_plugin" then
-					logger.lib_print(`| + loading plugin {id}...`)
-					logger.lib_print("|----------------------")
-					logger.lib_print(`|*log for {id} here`)
+					print(`| + loading plugin {id}...`)
+					print("|----------------------")
+					print(`|*log for {id} here`)
 					load_plugin(system_or_plugin)
-					logger.lib_print("|----------------------")
-					logger.lib_print("|✅ Done!")
+					print("|----------------------")
+					print("|✅ Done!")
 				elseif system_or_plugin.type == "revy_system" then
 					logger.lib_warn(
 						`systems cannot be hot reloaded currently - use revy.plugin instead of revy.system.\n(source: {id} @ {module:GetFullName()})`
@@ -326,7 +335,7 @@ function revy.app()
 					return
 				end
 
-				local ok, system_or_plugin = pcall(require, module)
+				local ok, system_or_plugin = pcall(require :: any, module)
 
 				if not ok then
 					logger.lib_warn(
@@ -342,7 +351,7 @@ function revy.app()
 		return self
 	end
 
-	function app:network_components(components)
+	function app:network_components(components: { [string]: jecs.Entity })
 		for name, component in components do
 			if not app.world:get(component, jecs.Name) then
 				logger.lib_warn(
@@ -372,15 +381,52 @@ local Transform = jecs.component() :: types.Transform
 jecs.meta(Transform, jecs.Name, "Transform")
 jecs.meta(Transform, revy.Export, text_entity_default_parsers.CFrame)
 
+local FrameEvent = jecs.component()
+jecs.meta(FrameEvent, jecs.Name, "revy.FrameEvent")
+
 revy.renderer = Renderer
 revy.transform = Transform
 revy.networked = replecs.networked :: typeof(jecs.tag())
 revy.reliable = replecs.reliable :: typeof(jecs.tag())
 revy.unreliable = replecs.unreliable :: typeof(jecs.tag())
+revy.FrameEvent = FrameEvent :: typeof(jecs.tag())
+
+revy.frame_event_plugin = revy.plugin("revy.frame_event", function(app)
+	local frame_event_components: { jecs.Entity } = {}
+
+	for component in app.world:query(revy.FrameEvent) do
+		table.insert(frame_event_components, component)
+	end
+
+	app.world:added(revy.FrameEvent, function(component)
+		table.insert(frame_event_components, component)
+	end)
+
+	app.world:removed(revy.FrameEvent, function(component)
+		local match = table.find(frame_event_components, component)
+
+		if match then
+			table.remove(frame_event_components, match)
+		end
+	end)
+
+	app:add_systems(
+		"last",
+		revy.system("revy.frame_event.last", function(world)
+			for _, component in frame_event_components do
+				for entity in world:query(component) do
+					world:remove(entity, component)
+				end
+			end
+		end)
+	)
+
+	return nil
+end)
 
 revy.network_plugin = revy.plugin("revy.network", function(app)
 	if RunService:IsServer() then
-		remotes.receive_full.OnServerInvoke = function(player)
+		remotes.receive_full.OnServerInvoke = function(player): ...any
 			if app.network.server:is_player_ready(player) then
 				return nil
 			end
@@ -427,6 +473,8 @@ revy.network_plugin = revy.plugin("revy.network", function(app)
 			end)
 		)
 	end
+
+	return nil
 end)
 
 revy.time = revy.resource("revy.time") :: Resource<{ delta: number }>
@@ -444,6 +492,8 @@ revy.time_plugin = revy.plugin("revy.time", function(app)
 			last_tick = now
 		end)
 	)
+
+	return nil
 end)
 
 return revy

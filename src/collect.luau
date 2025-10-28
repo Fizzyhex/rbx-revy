@@ -1,3 +1,4 @@
+local types = require("./types")
 local function collect(signal: any)
 	local enqueued = {}
 
@@ -22,11 +23,6 @@ local function collect(signal: any)
 		connection
 end
 
-type Signal<T... = ...any> = {
-	Connect: (self: Signal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
-	ConnectParallel: (self: Signal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
-	Once: (self: Signal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
-	Wait: (self: Signal<T...>) -> T...,
-}
+type Signal<T... = ...any> = types.Signal<T...>
 
 return collect :: <T...>(Signal<T...>) -> (() -> T..., RBXScriptConnection)

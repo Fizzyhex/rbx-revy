@@ -16,19 +16,26 @@ ecs.meta(Dialog, ecs.Name, "Dialog")
 local DialogCycler = ecs.component() :: game_types.DialogCycler
 ecs.meta(DialogCycler, ecs.Name, "DialogCycler")
 
-local ReadDialog = ecs.component() :: game_types.ReadDialog
-ecs.meta(ReadDialog, ecs.Name, "ReadDialog")
-
 local DialogEmitterRbx = ecs.component() :: game_types.DialogEmitterRbx
 ecs.meta(DialogEmitterRbx, ecs.Name, "DialogEmitterRbx")
 ecs.meta(DialogEmitterRbx, revy.Export, revy.exporters.path_map)
+
+local Prompt = ecs.tag() :: game_types.Prompt
+ecs.meta(Prompt, ecs.Name, "Prompt")
 
 local PromptRbx = ecs.component() :: game_types.PromptRbx
 ecs.meta(PromptRbx, ecs.Name, "PromptRbx")
 ecs.meta(PromptRbx, revy.Export, revy.exporters.path)
 
-local PromptTriggered = ecs.tag()
-ecs.meta(PromptTriggered, ecs.Name, "PromptTriggered")
+local PromptTriggeredEvent = ecs.component()
+ecs.meta(PromptTriggeredEvent, ecs.Name, "PromptTriggeredEvent")
+ecs.meta(PromptTriggeredEvent, revy.FrameEvent)
+
+local PromptConnection = ecs.component() :: game_types.PromptConnection
+ecs.meta(PromptConnection, ecs.Name, "PromptConnection")
+
+local DialogRandomiser = ecs.component() :: game_types.DialogRandomiser
+ecs.meta(DialogRandomiser, ecs.Name, "DialogRandomiser")
 
 return {
 	Renderer = revy.renderer,
@@ -38,11 +45,13 @@ return {
 
 	Dialog = Dialog,
 	DialogEmitterRbx = DialogEmitterRbx,
-	ReadDialog = ReadDialog,
 	DialogCycler = DialogCycler,
+	DialogRandomiser = DialogRandomiser,
 
+	Prompt = Prompt,
 	PromptRbx = PromptRbx,
-	PromptTriggered = PromptTriggered,
+	PromptTriggeredEvent = PromptTriggeredEvent,
+	PromptConnection = PromptConnection,
 
 	Unpower = Unpower,
 }

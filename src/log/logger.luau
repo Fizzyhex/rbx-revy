@@ -1,4 +1,4 @@
-export type LoggerFn<T = () -> ()> = T & () -> ()
+export type LoggerFn<T = (...any) -> ()> = T & () -> ()
 
 export type LoggerTable = {
 	warn: typeof(warn),
@@ -14,7 +14,7 @@ end
 local LIBRARY_PREFIX = "[revy] "
 
 local function stamp(...: string)
-	local output = {}
+	local output: { string } = {}
 
 	for _, s in { ... } do
 		if typeof(s) ~= "string" then
@@ -22,11 +22,11 @@ local function stamp(...: string)
 			continue
 		end
 
-		local new = s:gsub("\n(.-)", function(rest)
+		local new = s:gsub("\n(.-)", function(rest: string)
 			if rest:sub(1, #LIBRARY_PREFIX) ~= LIBRARY_PREFIX then
-				return `\n{LIBRARY_PREFIX}` .. rest
+				return `\n{LIBRARY_PREFIX}{rest}`
 			else
-				return "\n" .. rest
+				return `\n{rest}`
 			end
 		end)
 
@@ -52,8 +52,8 @@ local lib_error = function(message, level)
 	error(stamp(message), level)
 end
 
-local lib_assert = function(condition: any, ...: string)
-	assert(condition, stamp(...))
+local lib_assert = function(condition: any, x: string?)
+	assert(condition, x)
 end
 
 local logger = {
@@ -130,14 +130,14 @@ function logger.find_maybes(search: { string }, term: string)
 		local against = search_strip(value)
 
 		if against:find(query) then
-			table.insert(maybes, against)
+			table.insert(maybes, value)
 		end
 	end
 
 	return maybes :: { string }
 end
 
-function logger.maybe_keys(...: {})
+function logger.maybe_keys(...: { [string]: unknown })
 	local maybes = {}
 
 	for _, search in { ... } do
@@ -149,7 +149,7 @@ function logger.maybe_keys(...: {})
 	return maybes :: { string }
 end
 
-function logger.maybe_values(...: {})
+function logger.maybe_values(...: { string })
 	local maybes = {}
 
 	for _, search in { ... } do
