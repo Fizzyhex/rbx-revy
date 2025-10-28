@@ -391,6 +391,7 @@ revy.reliable = replecs.reliable :: typeof(jecs.tag())
 revy.unreliable = replecs.unreliable :: typeof(jecs.tag())
 revy.FrameEvent = FrameEvent :: typeof(jecs.tag())
 
+-- // TODO: Defer frame events until next frame to prevent weird edge-cases
 revy.frame_event_plugin = revy.plugin("revy.frame_event", function(app)
 	local frame_event_components: { jecs.Entity } = {}
 
