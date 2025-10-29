@@ -27,9 +27,8 @@ local PromptRbx = ecs.component() :: game_types.PromptRbx
 ecs.meta(PromptRbx, ecs.Name, "PromptRbx")
 ecs.meta(PromptRbx, revy.Export, revy.exporters.path)
 
-local PromptTriggeredEvent = ecs.component()
+local PromptTriggeredEvent = ecs.component() :: revy.Entity
 ecs.meta(PromptTriggeredEvent, ecs.Name, "PromptTriggeredEvent")
-ecs.meta(PromptTriggeredEvent, revy.FrameEvent)
 
 local PromptConnection = ecs.component() :: game_types.PromptConnection
 ecs.meta(PromptConnection, ecs.Name, "PromptConnection")
@@ -54,4 +53,7 @@ return {
 	PromptConnection = PromptConnection,
 
 	Unpower = Unpower,
+
+	Reliable = revy.reliable,
+	Unreliable = revy.unreliable,
 }

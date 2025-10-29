@@ -1,6 +1,7 @@
 local jecs = require("@packages/jecs")
 local planck = require("@packages/planck")
 local replecs = require("@packages/replecs")
+local event_util = require("@revy/events/event_util")
 
 export type SystemFn = planck.SystemFn<>
 
@@ -31,13 +32,33 @@ export type TextEntityContext = {
 
 export type RevyApp<App = {}> = App & {
 	world: jecs.World,
+
+	-- Networking
 	network: replecs.ReplecsLib,
+
+	-- Scheduler
 	add_systems: (self: RevyApp<App>, schedule: Schedule, ...System) -> RevyApp<App>,
+
+	-- Debugging
 	open_debugger: (self: RevyApp<App>) -> RevyApp<App>,
 	bind_debugger: (self: RevyApp<App>, key: Enum.KeyCode) -> RevyApp<App>,
+
+	-- Resources
 	get_resource: <T>(self: RevyApp<App>, resource: Resource<T>) -> T,
 	insert_resource: <T>(self: RevyApp<App>, resource: Resource<T>, data: T) -> RevyApp<App>,
 
+	-- Events
+	event_context: event_util.EventContext,
+	event: <T, a>(self: RevyApp<App>, jecs.Entity<T>, component: jecs.Entity<a>, data: a?) -> jecs.Id<a>,
+	query_event: <T>(self: RevyApp<App>, event_id: jecs.Entity<T>) -> () -> (jecs.Id, T),
+	query_event_for: <T, a>(
+		self: RevyApp<App>,
+		context: event_util.EventContext,
+		event_id: jecs.Id<T>,
+		entity: jecs.Entity<a>
+	) -> () -> a,
+
+	-- Text Entities
 	--[=[
 # Text Entities
 
@@ -127,7 +148,7 @@ export type RevyAppCommands = RevyApp<{
 	run: (self: RevyAppCommands) -> RevyApp,
 }>
 
-export type Schedule = "update" | "pre_render" | "start" | "last" | "first"
+export type Schedule = "start" | "pre_render" | "first" | "events" | "update" | "last"
 
 --- Default components
 

@@ -5,7 +5,7 @@ local function rotator_plugin(app: revy.RevyApp)
 	app:add_systems(
 		"update",
 		revy.system("game.rotator.spin", function(world)
-			local time = app:get_resource(revy.time)
+			local time = app:get_resource(revy.resources.time)
 
 			for _, rotator, renderer in world:query(game_components.Rotator, game_components.Renderer) do
 				renderer:PivotTo(

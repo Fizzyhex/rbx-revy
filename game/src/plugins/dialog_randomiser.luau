@@ -15,19 +15,15 @@ return revy.plugin("game.dialog_randomiser", function(app: revy.RevyApp)
 	app:add_systems(
 		"update",
 		revy.system("game.dialog_randomiser.update", function(world)
-			for id, _dialog_randomiser, dialog, _prompt_triggered_event in
-				world:query(
-					game_components.DialogRandomiser,
-					game_components.Dialog,
-					game_components.PromptTriggeredEvent
-				)
-			do
-				print("dialog=", id, _dialog_randomiser, dialog, _prompt_triggered_event)
+			for id in app:query_event(game_components.PromptTriggeredEvent) do
+				local dialog, dialog_randomiser =
+					world:get(id, game_components.Dialog), world:get(id, game_components.DialogRandomiser)
 
-				if #dialog == 0 then
+				if dialog == nil or dialog_randomiser == nil then
 					continue
 				end
 
+				print("dialog=", id, dialog[math.random(1, #dialog)])
 				dialog_resource.say(id, dialog[math.random(1, #dialog)])
 			end
 		end)

@@ -1,9 +1,8 @@
 local revy = require("@revy")
 local observe_tag = require("./observe_tag")
 local game_components = require("./game_components")
-local insert_streamables = require("./plugins/insert_streamables")
 
-local app = revy.app():network_components(game_components):add_plugins(insert_streamables):run()
+local app = revy.app():network_components(game_components):run()
 
 observe_tag("rotator", function(scope, model)
 	assert(model:IsA("Model"), `{model:GetFullName()}:IsA("Model") = false - rotators must be models!`)

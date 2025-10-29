@@ -8,9 +8,16 @@ return revy.plugin("game.dialog_prompt", function(app: revy.RevyApp)
 		revy.system("game.dialog_prompt.update", function(world)
 			local dialog_resource = app:get_resource(dialog_resource_plugin.RESOURCE)
 
-			for id, _prompt_triggered_event, dialog_cycler, dialog in
-				world:query(game_components.PromptTriggeredEvent, game_components.DialogCycler, game_components.Dialog)
-			do
+			for id in app:query_event(game_components.PromptTriggeredEvent) do
+				print("rahhahah", game:GetService("RunService"):IsServer())
+
+				local dialog_cycler, dialog =
+					world:get(id, game_components.DialogCycler), world:get(id, game_components.Dialog)
+
+				if dialog_cycler == nil or dialog == nil then
+					continue
+				end
+
 				dialog_resource.say(id, dialog[dialog_cycler.index])
 
 				dialog_cycler.index += 1

@@ -33,6 +33,7 @@ end
 
 local replecs = require("@packages/replecs")
 local jecs = require("@packages/jecs")
+local event_util = require("@revy/events/event_util")
 local logger = require("@revy/log/logger")
 local text_entity_default_parsers = require("@revy/text_entity/text_entity_default_parsers")
 
@@ -72,6 +73,7 @@ export type Signal<T... = ...any> = types.Signal<T...>
 local schedule_phase_map = {
 	start = planck.Phase.Startup,
 	first = planck_run_service.Phases.First,
+	events = planck_run_service.Phases.PreUpdate,
 	update = planck_run_service.Phases.Update,
 	last = planck_run_service.Phases.Last,
 	pre_render = planck_run_service.Phases.PreRender,
@@ -126,6 +128,10 @@ function revy.app()
 	app.network = replecs.create()
 	app.world = jecs.world()
 
+	local event_context = event_util.context(app.world)
+
+	app.event_context = event_context
+
 	local parser_context = text_entity_util.new_parser_context(app.world, {
 		reliable = revy.reliable,
 		unreliable = revy.unreliable,
@@ -155,6 +161,18 @@ function revy.app()
 	function app:insert_resource<T>(resource: Resource<T>, data: T)
 		resources[resource] = data :: any
 		return self
+	end
+
+	function app:event(entity, component, data)
+		return event_util.eventity(event_context, entity, component, data)
+	end
+
+	function app:query_event(event_id)
+		return event_util.query_event(event_context, event_id)
+	end
+
+	function app:query_event_for(event_id, entity)
+		return event_util.query_event_for(event_context, event_id, entity)
 	end
 
 	function app:get_resource<T>(resource: Resource<T>)
@@ -252,8 +270,8 @@ function revy.app()
 			end
 		end
 
-		load_plugin(revy.network_plugin)
-		load_plugin(revy.frame_event_plugin)
+		load_plugin(revy.plugins.network_plugin)
+		load_plugin(revy.plugins.events_plugin)
 
 		for _, plugin in plugins do
 			load_plugin(plugin)
@@ -366,7 +384,7 @@ function revy.app()
 		return self
 	end
 
-	app:add_plugins(revy.time_plugin)
+	app:add_plugins(revy.plugins.time_plugin)
 
 	return app
 end
@@ -389,43 +407,32 @@ revy.transform = Transform
 revy.networked = replecs.networked :: typeof(jecs.tag())
 revy.reliable = replecs.reliable :: typeof(jecs.tag())
 revy.unreliable = replecs.unreliable :: typeof(jecs.tag())
-revy.FrameEvent = FrameEvent :: typeof(jecs.tag())
+
+--- Built-in plugins that are enabled by default.
+revy.plugins = {}
+
+revy.resources = {}
 
 -- // TODO: Defer frame events until next frame to prevent weird edge-cases
-revy.frame_event_plugin = revy.plugin("revy.frame_event", function(app)
-	local frame_event_components: { jecs.Entity } = {}
-
-	for component in app.world:query(revy.FrameEvent) do
-		table.insert(frame_event_components, component)
-	end
-
-	app.world:added(revy.FrameEvent, function(component)
-		table.insert(frame_event_components, component)
-	end)
-
-	app.world:removed(revy.FrameEvent, function(component)
-		local match = table.find(frame_event_components, component)
-
-		if match then
-			table.remove(frame_event_components, match)
-		end
-	end)
+revy.plugins.events_plugin = revy.plugin("revy.events", function(app)
+	app:add_systems(
+		"events",
+		revy.system("revy.frame_event.release", function()
+			event_util.internal.release(app.event_context)
+		end)
+	)
 
 	app:add_systems(
 		"last",
-		revy.system("revy.frame_event.last", function(world)
-			for _, component in frame_event_components do
-				for entity in world:query(component) do
-					world:remove(entity, component)
-				end
-			end
+		revy.system("revy.frame_event.flush", function()
+			event_util.internal.flush(app.event_context)
 		end)
 	)
 
 	return nil
 end)
 
-revy.network_plugin = revy.plugin("revy.network", function(app)
+revy.plugins.network_plugin = revy.plugin("revy.network", function(app)
 	if RunService:IsServer() then
 		remotes.receive_full.OnServerInvoke = function(player): ...any
 			if app.network.server:is_player_ready(player) then
@@ -478,11 +485,12 @@ revy.network_plugin = revy.plugin("revy.network", function(app)
 	return nil
 end)
 
-revy.time = revy.resource("revy.time") :: Resource<{ delta: number }>
-revy.time_plugin = revy.plugin("revy.time", function(app)
+revy.resources.time = revy.resource("revy.time") :: Resource<{ delta: number }>
+
+revy.plugins.time_plugin = revy.plugin("revy.time", function(app)
 	local time = { delta = 0 }
 
-	app:insert_resource(revy.time, time)
+	app:insert_resource(revy.resources.time, time)
 	local last_tick = os.clock()
 
 	app:add_systems(
