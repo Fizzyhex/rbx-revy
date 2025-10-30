@@ -12,7 +12,7 @@ fi
 BOLD_GREEN='\033[1;32m'
 NC='\033[0m' # No Color
 
-printf "${BOLD_GREEN}Processing latest revy changes${NC}\n"
+printf "${BOLD_GREEN}Processing latest Revy changes${NC}\n"
 
 # Build darklua revy output first
 rojo sourcemap dev.project.json -o sourcemap.json

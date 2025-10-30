@@ -167,12 +167,8 @@ function revy.app()
 		return event_util.eventity(event_context, entity, component, data)
 	end
 
-	function app:query_event(event_id)
-		return event_util.query_event(event_context, event_id)
-	end
-
-	function app:query_event_for(event_id, entity)
-		return event_util.query_event_for(event_context, event_id, entity)
+	function app:event_consumer()
+		return event_util.consumer(event_context)
 	end
 
 	function app:get_resource<T>(resource: Resource<T>)
@@ -235,7 +231,6 @@ function revy.app()
 		local entity_instance_map: { [Instance]: types.Renderer } = {}
 
 		app.world:added(revy.renderer, function(entity, _id, model)
-			logger.lib_print("mapping", entity, "to model", model)
 			entity_instance_map[model] = entity
 		end)
 
@@ -415,17 +410,12 @@ revy.resources = {}
 
 -- // TODO: Defer frame events until next frame to prevent weird edge-cases
 revy.plugins.events_plugin = revy.plugin("revy.events", function(app)
-	app:add_systems(
-		"events",
-		revy.system("revy.frame_event.release", function()
-			event_util.internal.release(app.event_context)
-		end)
-	)
+	local flush = event_util.system.flush
 
 	app:add_systems(
 		"last",
 		revy.system("revy.frame_event.flush", function()
-			event_util.internal.flush(app.event_context)
+			flush(app.event_context)
 		end)
 	)
 

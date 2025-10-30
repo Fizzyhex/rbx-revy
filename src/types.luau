@@ -50,13 +50,7 @@ export type RevyApp<App = {}> = App & {
 	-- Events
 	event_context: event_util.EventContext,
 	event: <T, a>(self: RevyApp<App>, jecs.Entity<T>, component: jecs.Entity<a>, data: a?) -> jecs.Id<a>,
-	query_event: <T>(self: RevyApp<App>, event_id: jecs.Entity<T>) -> () -> (jecs.Id, T),
-	query_event_for: <T, a>(
-		self: RevyApp<App>,
-		context: event_util.EventContext,
-		event_id: jecs.Id<T>,
-		entity: jecs.Entity<a>
-	) -> () -> a,
+	event_consumer: (self: RevyApp<App>) -> event_util.EventConsumer,
 
 	-- Text Entities
 	--[=[
