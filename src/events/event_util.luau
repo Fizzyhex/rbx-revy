@@ -48,10 +48,6 @@ function event_util.consumer(context: EventContext)
 		for _, key in to_remove do
 			already_collected[key] = nil
 		end
-
-		if #to_remove > 0 then
-			print(`Cleaned {#to_remove} event(s)`)
-		end
 	end
 
 	function event_consumer:cache_event<T>(event_id: jecs.Id<T>)
@@ -122,7 +118,6 @@ function event_util.eventity<T, a>(context: EventContext, id: jecs.Id<T>, compon
 	context.world:set(eventity, component, data)
 	context.world:set(eventity, eventity_cycles, 0)
 	context.world:add(eventity, jecs.pair(jecs.ChildOf, id))
-	print("event live at", eventity)
 	return eventity
 end
 

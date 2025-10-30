@@ -14,7 +14,6 @@ return revy.plugin("game.prompt_rbx", function(app: revy.RevyApp)
 
 			for entity, prompt_connection in world:query(game_components.PromptConnection) do
 				for _ in prompt_connection.collect do
-					print("insert!")
 					app:event(entity, game_components.PromptTriggeredEvent)
 					break
 				end
