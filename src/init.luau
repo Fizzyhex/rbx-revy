@@ -43,6 +43,7 @@ local new_plugin = require("@self/new_plugin")
 local remotes = require("@self/remotes")
 local system_utils = require("@self/system_utils")
 local types = require("@self/types")
+local make_bundle = require("@self/bundles/make_bundle")
 
 export type Archetype = jecs.Archetype
 export type QueryInner = jecs.QueryInner
@@ -70,6 +71,8 @@ export type Plugin = types.Plugin<RevyApp>
 export type Resource<T = any> = types.Resource<T>
 export type Signal<T... = ...any> = types.Signal<T...>
 
+export type Bundle = make_bundle.Bundle
+
 local schedule_phase_map = {
 	start = planck.Phase.Startup,
 	first = planck_run_service.Phases.First,
@@ -84,6 +87,7 @@ local unreliables_interval = interval(1 / 30)
 
 local revy = { ecs = jecs }
 
+revy.bundle = make_bundle
 revy.plugin = new_plugin
 revy.collect = collect
 revy.interval = interval
