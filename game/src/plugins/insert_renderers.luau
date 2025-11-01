@@ -4,7 +4,7 @@ local game_components = require("../game_components")
 local function insert_renderers(app: revy.RevyApp)
 	-- TODO: Complete, and also swap to world:changed?
 
-	local unsub_added = app.world:added(game_components.Renderer, function(id, component, data: unknown)
+	local unsub_added = app.world:added(game_components.Renderer, function(_id, _component, data: unknown)
 		assert(typeof(data) == "Instance")
 
 		if not data:IsDescendantOf(game) then
