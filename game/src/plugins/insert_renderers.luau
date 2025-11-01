@@ -1,4 +1,5 @@
 local revy = require("@revy")
+local game_types = require("../game_types")
 local game_components = require("../game_components")
 
 local function insert_renderers(app: revy.RevyApp)
@@ -13,7 +14,7 @@ local function insert_renderers(app: revy.RevyApp)
 	end)
 
 	local unsub_removed = app.world:removed(game_components.Renderer, function(id, component)
-		local data = app.world:get(id, component)
+		local data = app.world:get(id, component :: game_types.Renderer)
 		assert(typeof(data) == "Instance")
 
 		if data.Parent == workspace then
