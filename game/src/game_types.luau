@@ -1,8 +1,8 @@
 local revy = require("@revy")
 
-type Entity<T = any> = revy.Entity<T>
+type Id<T = any> = revy.Id<T>
 
-type CollectConnection<T...> = revy.Entity<{ collect: () -> T..., connection: RBXScriptConnection }>
+type CollectConnection<T...> = revy.Id<{ collect: () -> T..., connection: RBXScriptConnection }>
 
 ------------
 -- STATE
@@ -26,30 +26,30 @@ export type DialogEmitterRbxData = {
 -- ENTITIES
 ------------
 
-export type Rotator = Entity<Vector3>
+export type Rotator = Id<Vector3>
 
-export type Unpower = Entity
+export type Unpower = Id
 
-export type Renderer = Entity<{ model: Model }>
+export type Renderer = Id<{ model: Model }>
 
 --- An array of dialog messages
-export type Dialog = Entity<{ string }>
+export type Dialog = Id<{ string }>
 
 --- Cycles thru dialog messages
-export type DialogCycler = Entity<{ index: number }>
+export type DialogCycler = Id<{ index: number }>
 
 --- Plays random dialog messages
-export type DialogRandomiser = Entity
+export type DialogRandomiser = Id
 
 --- Renders the dialog in the world
-export type DialogEmitterRbx = Entity<{
+export type DialogEmitterRbx = Id<{
 	sound: Sound?,
 	source: BasePart,
 }>
 
-export type Prompt = Entity
+export type Prompt = Id
 
-export type PromptRbx = Entity<ProximityPrompt>
+export type PromptRbx = Id<ProximityPrompt>
 
 export type PromptConnection = CollectConnection<Player>
 

@@ -146,7 +146,7 @@ export type Schedule = "start" | "pre_render" | "first" | "events" | "update" | 
 
 --- Default components
 
-export type Renderer = jecs.Entity<Model>
-export type Transform = jecs.Entity<CFrame>
+export type Renderer = jecs.Id<Model>
+export type Transform = jecs.Id<CFrame>
 
 return nil

@@ -1,4 +1,5 @@
 local revy = require("@revy")
+local insert_renderers = require("./plugins/insert_renderers")
 local prompt_rbx = require("./plugins/prompt_rbx")
 local insert_streamables = require("./plugins/insert_streamables")
 local game_components = require("./game_components")
@@ -16,7 +17,8 @@ revy.app()
 		prompt_rbx,
 		dialog_resource_plugin.plugin,
 		dialog_cycler,
-		dialog_randomiser
+		dialog_randomiser,
+		insert_renderers
 	)
 	:network_components(game_components)
 	:bind_debugger(Enum.KeyCode.Q)
