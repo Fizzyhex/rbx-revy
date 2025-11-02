@@ -1,4 +1,3 @@
-local replecs = require("@packages/.pesde/pepeeltoro41_replecs@0.0.2/replecs/src")
 local jecs = require("@packages/jecs")
 local logger = require("@revy/log/logger")
 
