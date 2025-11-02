@@ -1,8 +1,8 @@
 local jecs = require("@packages/jecs")
 
 export type Bundler = {
-	add: <Data>(component: jecs.Id<Data>, Data) -> (),
-	set: <Data>(component: jecs.Id<Data>) -> (),
+	add: <Data>(component: jecs.Id<Data>) -> (),
+	set: <Data>(component: jecs.Id<Data>, Data) -> (),
 }
 
 export type BundleFn = (Bundler) -> ()
@@ -18,7 +18,7 @@ local function make_bundle(bundle_fn: BundleFn)
 	local datas: { [number]: jecs.Entity } = {}
 	local ids: { jecs.Id } = {}
 
-	local function add<T>(component: jecs.Id<T>, data: T)
+	local function set<T>(component: jecs.Id<T>, data: T)
 		if ids[component :: T] then
 			return
 		end
@@ -28,7 +28,7 @@ local function make_bundle(bundle_fn: BundleFn)
 		datas[index] = data
 	end
 
-	local function set<T>(component: jecs.Id<T>)
+	local function add<T>(component: jecs.Id<T>)
 		if ids[component :: T] then
 			return
 		end
