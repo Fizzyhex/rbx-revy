@@ -2,7 +2,7 @@
 # It is not intended for manual editing.
 format = 2
 name = "fizzyhex/revy"
-version = "0.7.3"
+version = "0.7.4"
 target = "roblox"
 
 [overrides."jabby>jecs"]
