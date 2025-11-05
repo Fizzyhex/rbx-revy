@@ -7,7 +7,6 @@ Dialog = [
     "i'm just so spontaneous...",
     "🐦 chirp"
 ]
-PromptRbx = "HumanoidRootPart/ProximityPrompt"
 DialogRandomiser = {}
 
 [components.DialogEmitterRbx]

@@ -7,6 +7,7 @@ type CollectConnection<T...> = revy.Id<{ collect: () -> T..., connection: RBXScr
 ------------
 -- STATE
 ------------
+
 export type WorldState = {}
 
 ------------
@@ -43,7 +44,7 @@ export type DialogRandomiser = Id
 
 --- Renders the dialog in the world
 export type DialogEmitterRbx = Id<{
-	sound: Sound?,
+	sound: Sound | nil,
 	source: BasePart,
 }>
 
@@ -52,5 +53,9 @@ export type Prompt = Id
 export type PromptRbx = Id<ProximityPrompt>
 
 export type PromptConnection = CollectConnection<Player>
+
+export type RainbowHighlight = Id
+
+export type RainbowHighlightRbx = Id<Highlight>
 
 return nil

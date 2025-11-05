@@ -36,6 +36,12 @@ ecs.meta(PromptConnection, ecs.Name, "PromptConnection")
 local DialogRandomiser = ecs.component() :: game_types.DialogRandomiser
 ecs.meta(DialogRandomiser, ecs.Name, "DialogRandomiser")
 
+local RainbowHighlight = ecs.component() :: game_types.RainbowHighlight
+ecs.meta(RainbowHighlight, ecs.Name, "RainbowHighlight")
+
+local RainbowHighlightRbx = ecs.component() :: game_types.RainbowHighlightRbx
+ecs.meta(RainbowHighlightRbx, ecs.Name, "RainbowHighlightRbx")
+
 return {
 	Renderer = revy.renderer,
 	Transform = revy.transform,
@@ -53,6 +59,8 @@ return {
 	PromptConnection = PromptConnection,
 
 	Unpower = Unpower,
+	RainbowHighlight = RainbowHighlight,
+	RainbowHighlightRbx = RainbowHighlightRbx,
 
 	Reliable = revy.reliable,
 	Unreliable = revy.unreliable,

@@ -7,7 +7,6 @@ components:
     - i'm kinda like npc_001, but my data is stored in yaml.,
     - i wasn't even sure that rojo could pass yaml, but as of 7.6.0 it can!
     - any format your tooling can convert to a module will work just fine, which is awesome :>
-  PromptRbx: "HumanoidRootPart/ProximityPrompt"
   DialogCycler:
     index: 1
 
