@@ -33,6 +33,12 @@ end
 
 local replecs = require("@packages/replecs")
 local jecs = require("@packages/jecs")
+
+-- prevent clashes with replecs's built-in components.
+for _ = 1, 13 do
+	jecs.component()
+end
+
 local event_util = require("@revy/events/event_util")
 local logger = require("@revy/log/logger")
 local text_entity_default_parsers = require("@revy/text_entity/text_entity_default_parsers")
