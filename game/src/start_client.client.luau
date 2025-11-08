@@ -31,4 +31,4 @@ local app = revy.app()
 	:run()
 
 -- spawn susan
-Susan(app.world)
+revy.bundles.spawn(Susan(), app.world)
