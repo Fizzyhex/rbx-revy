@@ -68,7 +68,7 @@ local function spawn(context, world, entity)
 	if typeof(context) == "function" then
 		return spawn_from_context(context(), world, entity)
 	else
-		return spawn(context, world, entity)
+		return spawn_from_context(context :: BundleContext, world, entity)
 	end
 end
 
