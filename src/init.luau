@@ -86,6 +86,8 @@ local schedule_phase_map = {
 local updates_interval = interval(1 / 20)
 local unreliables_interval = interval(1 / 30)
 
+local PLANCK_INJECTION_KEY = "revy_id"
+
 local revy = {
 	--- This is Jecs. Docs: https://ukendio.github.io/jecs/
 	ecs = jecs,
@@ -128,7 +130,8 @@ function revy.app()
 	local system_map: { [string]: SystemFn } = {}
 	local plugin_cleanup_map: { [string]: () -> () } = {}
 
-	local had_first_load: { [string]: true } = {}
+	local system_loading_behaviour = "instant" :: "instant" | "queue"
+	local system_loading_queue: { [string]: { system: any, phase: Schedule } } = {}
 
 	local hot_reloader = rewire.HotReloader.new()
 
@@ -152,18 +155,49 @@ function revy.app()
 	local scheduler =
 		planck.Scheduler.new(app.world):addPlugin(planck_run_service.Plugin.new()):addPlugin(planck_jabby.new())
 
-	local function unload_plugin(plugin_id: string)
+	local function collect_systems(plugin_id: string)
+		local systems = {}
+
 		for map_id, map_system in system_map do
 			if map_id == plugin_id or map_id:match(`^{plugin_id}.`) then
-				print(`{logger.TINY_TAB} - unloading system {map_id}`)
-				scheduler:removeSystem(map_system)
-				system_map[map_id] = nil
+				systems[map_id] = map_system
 			end
 		end
 
-		if plugin_cleanup_map[plugin_id] then
-			plugin_cleanup_map[plugin_id]()
+		return systems
+	end
+
+	local function add_system(id: string, system)
+		scheduler:addSystems(system)
+		scheduler._systemInfo[system.system][PLANCK_INJECTION_KEY] = id
+		system_map[id] = system
+	end
+
+	local function remove_system(id: string)
+		if system_map[id] then
+			scheduler:removeSystem(system_map[id])
+			system_map[id] = nil
+		else
+			warn(`System {id} not found - nothing will be unloaded`, debug.traceback())
 		end
+	end
+
+	local function replace_or_add_system(id: string, new)
+		if system_map[id] then
+			for key, value in scheduler._systemInfo do
+				if value[PLANCK_INJECTION_KEY] == id then
+					scheduler:replaceSystem(key, new)
+					return
+				end
+			end
+
+			print(scheduler._systemInfo)
+			error("system replace found no matches")
+		else
+			add_system(id, new)
+		end
+
+		system_map[id] = new
 	end
 
 	function app:insert_resource<T>(resource: Resource<T>, data: T)
@@ -205,7 +239,6 @@ function revy.app()
 	function app:add_systems(schedule: Schedule, ...)
 		local phase = schedule_phase_map[schedule]
 		assert(phase, `Invalid schedule '{schedule}'`)
-		local systems = {}
 
 		for _, module in { ... } do
 			if module.type ~= "revy_system" then
@@ -215,12 +248,17 @@ function revy.app()
 				continue
 			end
 
-			local system = system_utils.to_planck(module)
-			system_map[module.id] = system
-			table.insert(systems, system)
-		end
+			local system_fn = system_utils.to_planck(module)
+			local system_table = { system = system_fn, phase = schedule }
 
-		scheduler:addSystems(systems, phase)
+			system_map[module.id] = system_table
+
+			if system_loading_behaviour == "queue" then
+				system_loading_queue[module.id] = system_table
+			else
+				add_system(module.id, system_table)
+			end
+		end
 
 		return self
 	end
@@ -299,7 +337,7 @@ function revy.app()
 	--- Enables hot reloading for all descendants of the provided instances.
 	function app:enable_hot_reloading(...: Instance)
 		for _, container in { ... } do
-			hot_reloader:scan(container, function(module)
+			hot_reloader:scan(container, function(module, context)
 				local ok, system_or_plugin = pcall(require :: any, module)
 
 				if not ok then
@@ -325,21 +363,50 @@ function revy.app()
 					return
 				end
 
-				-- Only hot reload on the second detection
-				if not had_first_load[id] then
-					had_first_load[id] = true
+				if not context.isReloading then
 					return
 				end
 
 				logger.lib_print(`Unloading plugin {id}...`)
 				print("|----------------------")
-				unload_plugin(id)
+
+				if plugin_cleanup_map[id] then
+					plugin_cleanup_map[id]()
+				end
+
+				local old_systems = collect_systems(id)
 
 				if system_or_plugin.type == "revy_plugin" then
 					print(`| + loading plugin {id}...`)
 					print("|----------------------")
 					print(`|*log for {id} here`)
+
+					system_loading_behaviour = "queue"
 					load_plugin(system_or_plugin)
+					system_loading_behaviour = "instant"
+					local new_systems = table.clone(system_loading_queue)
+					table.clear(system_loading_queue)
+
+					for key in old_systems do
+						if new_systems[key] then
+							-- replace
+							print(`> {key}`)
+							replace_or_add_system(key, new_systems[key])
+						else
+							-- remove
+							print(`- {key}`)
+							remove_system(key)
+						end
+					end
+
+					for key, value in new_systems do
+						if not old_systems[key] then
+							-- add
+							print(`+ {key}`)
+							add_system(key, value)
+						end
+					end
+
 					print("|----------------------")
 					print("|✅ Done!")
 				elseif system_or_plugin.type == "revy_system" then
@@ -365,7 +432,9 @@ function revy.app()
 					return
 				end
 
-				unload_plugin(system_or_plugin.id)
+				if plugin_cleanup_map[system_or_plugin.id] then
+					plugin_cleanup_map[system_or_plugin.id]()
+				end
 			end)
 		end
 
