@@ -4,7 +4,7 @@ type BundleTable = { __is_bundle_context: nil, [jecs.Id]: any }
 type BundleSwitch = BundleContext | BundleTable
 
 type NewComponentFn = <T>(ctx: BundleSwitch | { [jecs.Id]: any }, component: jecs.Id<T>, data: T) -> ()
-type NewTagFn = <T>(ctx: BundleSwitch, component: jecs.Id<T>) -> ()
+type NewTagFn = <T>(ctx: BundleSwitch | { [jecs.Id]: any }, component: jecs.Id<T>) -> ()
 
 type BundleContext = {
 	__is_bundle_context: true,
