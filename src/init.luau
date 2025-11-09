@@ -86,7 +86,10 @@ local schedule_phase_map = {
 local updates_interval = interval(1 / 20)
 local unreliables_interval = interval(1 / 30)
 
-local revy = { ecs = jecs }
+local revy = {
+	--- This is Jecs. Docs: https://ukendio.github.io/jecs/
+	ecs = jecs,
+}
 
 revy.bundles = bundles
 revy.plugin = new_plugin
@@ -402,18 +405,29 @@ jecs.meta(Transform, revy.Export, text_entity_default_parsers.CFrame)
 local FrameEvent = jecs.component()
 jecs.meta(FrameEvent, jecs.Name, "revy.FrameEvent")
 
+--- A built-in component used for displaying models in the datamodel.
 revy.renderer = Renderer
+
+--- A built-in component that represents object transforms.
 revy.transform = Transform
+
+--- Alias for `revy.network.networked`
 revy.networked = replecs.networked :: typeof(jecs.tag())
+--- Alias for `revy.network.reliable`
 revy.reliable = replecs.reliable :: typeof(jecs.tag())
+--- Alias for `revy.network.unreliable`
 revy.unreliable = replecs.unreliable :: typeof(jecs.tag())
+--- Alias for `revy.network.pair`
+revy.net_pair = replecs.pair :: typeof(jecs.tag())
+
+--- This is Replecs. Docs: https://pepeeltoro41.github.io/replecs/
+revy.network = replecs
 
 --- Built-in plugins that are enabled by default.
 revy.plugins = {}
 
 revy.resources = {}
 
--- // TODO: Defer frame events until next frame to prevent weird edge-cases
 revy.plugins.events_plugin = revy.plugin("revy.events", function(app)
 	local flush = event_util.system.flush
 
@@ -500,4 +514,4 @@ revy.plugins.time_plugin = revy.plugin("revy.time", function(app)
 	return nil
 end)
 
-return revy
+return table.freeze(revy)

@@ -56,7 +56,7 @@ export type RevyApp<App = {}> = App & {
 	--[=[
 # Text Entities
 
-A `Text Entity` is an entity's data represented by a `toml` file.
+A `Text Entity` is an entity's data stored in a readable format, often parsed to a table by Rojo. This example uses `toml`.
 
 Take this pseudo code for a 'fire' entity:
 
