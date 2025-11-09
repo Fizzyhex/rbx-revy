@@ -17,7 +17,11 @@ type NewBundleFn = <T...>(builder: BundleBuilderFn<T...>) -> Bundle<T...>
 type BundleBuilderFn<T...> = (ctx: BundleContext, T...) -> ()
 export type Bundle<T...> = (components: { [jecs.Id]: any }?, tags: { [jecs.Id]: any }?) -> (T...) -> BundleContext
 
-type SpawnFn = <T...>(context: BundleContext | (T...) -> BundleContext, world: jecs.World, entity: jecs.Entity?) -> ()
+type SpawnFn = <T...>(
+	context: BundleContext | (T...) -> BundleContext,
+	world: jecs.World,
+	entity: jecs.Entity?
+) -> jecs.Entity
 
 local function new_component<T>(ctx: BundleSwitch, component: jecs.Id<T>, data: T)
 	if ctx.__is_bundle_context then
@@ -62,6 +66,8 @@ local function spawn_from_context(context: BundleContext, world: jecs.World, ent
 	for key in context.tags do
 		world:add(entity, key)
 	end
+
+	return entity
 end
 
 local function spawn(context, world, entity)
