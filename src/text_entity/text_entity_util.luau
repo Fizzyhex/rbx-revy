@@ -130,7 +130,7 @@ function text_entity_util.parse(
 			end
 
 			for _, pair_with_name in pair_with_array do
-				local pair_with = get_pair_by_name(parser_context, pair_name)
+				local pair_with = get_pair_by_name(parser_context, pair_with_name)
 
 				if not pair_with then
 					local warn = logger.inject_variables(logger.lib_warn, logger_variables)
