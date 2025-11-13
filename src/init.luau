@@ -146,6 +146,7 @@ function revy.app()
 	local parser_context = text_entity_util.new_parser_context(app.world, {
 		reliable = revy.reliable,
 		unreliable = revy.unreliable,
+		networked = revy.networked
 	})
 
 	local function load_plugin(plugin: Plugin)
