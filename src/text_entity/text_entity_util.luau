@@ -78,6 +78,18 @@ function text_entity_util.parse(
 		parser_context.world:add(entity, jecs.pair(replecs.networked, entity))
 	end
 
+	if text_entity.net_tags then
+		local tags = (text_entity.tags or {}) :: { [any]:any }
+		text_entity.tags = tags
+		
+		for _, tag in text_entity.net_tags do
+			table.insert(tags, tag)
+			networked[tag] = true
+		end
+
+		parser_context.world:add(entity, jecs.pair(replecs.networked, entity))
+	end
+
 	if text_entity.components then
 		for component_name, raw_data in text_entity.components do
 			local component = parser_context.name_component_map[component_name]
@@ -126,6 +138,10 @@ function text_entity_util.parse(
 
 			parser_context.world:add(entity, tag)
 			--print("insert tag", entity, tag_name, tag)
+
+			if networked[tag_name] then
+				parser_context.world:add(entity, jecs.pair(replecs.reliable, tag))
+			end
 		end
 	end
 
