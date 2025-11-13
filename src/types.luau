@@ -52,6 +52,28 @@ export type RevyApp<App = {}> = App & {
 	event: <T, a>(self: RevyApp<App>, jecs.Entity<T>, component: jecs.Entity<a>, data: a?) -> jecs.Id<a>,
 	event_consumer: (self: RevyApp<App>) -> event_util.EventConsumer,
 
+	-- Shorthand
+	--[=[
+		Similar to `world:add`, but also adds a pair between `revy.reliable` (or an optionally provided `first_pair`) and your component.
+
+		Equivilant to you doing:
+		```luau
+		app.world:add(entity, component)
+		app.world:add(entity, jecs.pair(pair, component))
+		```
+	]=]
+	net_add: <T, a>(self: RevyApp<App>, entity: jecs.Entity, component: jecs.Id<T>, first_pair: jecs.Id<a>?) -> (jecs.Entity),
+	--[=[
+		Similar to `world:add`, but also adds a pair between `revy.reliable` (or an optionally provided `first_pair`) and your component.
+
+		Equivilant to you doing:
+		```luau
+		app.world:set(entity, component, value)
+		app.world:add(entity, jecs.pair(pair, component))
+		```
+	]=]
+	net_set: <T, a>(entity: jecs.Entity, component: jecs.Id<T>, value: T, first_pair: jecs.Id<a>?) -> (jecs.Entity),
+
 	-- Text Entities
 	--[=[
 # Text Entities

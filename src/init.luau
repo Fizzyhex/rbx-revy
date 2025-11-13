@@ -456,6 +456,20 @@ function revy.app()
 		return self
 	end
 
+	function app:net_add<T, a>(entity: jecs.Entity, component: jecs.Id<T>, first_pair: jecs.Id<a>?)
+		first_pair = first_pair or revy.reliable
+		app.world:add(entity, component)
+		app.world:add(entity, jecs.pair(first_pair, component))
+		return entity
+	end
+
+	function app:net_set<T, a>(entity: jecs.Entity, component: jecs.Id<T>, value: T, first_pair: jecs.Id<a>?)
+		first_pair = first_pair or revy.reliable
+		app.world:set(entity, component, value)
+		app.world:add(entity, jecs.pair(first_pair, component))
+		return entity
+	end
+
 	app:add_plugins(revy.plugins.time_plugin)
 
 	return app

@@ -1,4 +1,5 @@
 local jecs = require("@packages/jecs")
+local replecs = require("@packages/replecs")
 local logger = require("@revy/log/logger")
 
 type Context = any
@@ -63,6 +64,20 @@ function text_entity_util.parse(
 	context: Context,
 	logger_variables
 )
+	local networked = {}
+
+	if text_entity.net_components then
+		local components = (text_entity.components or {}) :: { [any]:any }
+		text_entity.components = components
+		
+		for component_name, raw_data in text_entity.net_components do
+			components[component_name] = raw_data
+			networked[component_name] = true
+		end
+
+		parser_context.world:add(entity, jecs.pair(replecs.networked, entity))
+	end
+
 	if text_entity.components then
 		for component_name, raw_data in text_entity.components do
 			local component = parser_context.name_component_map[component_name]
@@ -91,6 +106,10 @@ function text_entity_util.parse(
 			end
 
 			parser_context.world:set(entity, component, data)
+
+			if networked[component_name] then
+				parser_context.world:add(entity, jecs.pair(replecs.reliable, component))
+			end
 		end
 	end
 
