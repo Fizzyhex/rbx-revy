@@ -75,7 +75,7 @@ function text_entity_util.parse(
 			networked[component_name] = true
 		end
 
-		parser_context.world:add(entity, jecs.pair(replecs.networked, entity))
+		parser_context.world:add(entity, replecs.networked)
 	end
 
 	if text_entity.net_tags then
@@ -87,7 +87,7 @@ function text_entity_util.parse(
 			networked[tag] = true
 		end
 
-		parser_context.world:add(entity, jecs.pair(replecs.networked, entity))
+		parser_context.world:add(entity, replecs.networked)
 	end
 
 	if text_entity.components then
