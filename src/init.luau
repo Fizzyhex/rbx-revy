@@ -45,6 +45,7 @@ local remotes = require("@self/remotes")
 local system_utils = require("@self/system_utils")
 local types = require("@self/types")
 local bundles = require("@self/bundles/bundles")
+local jecs_internal = require("@self/jecs_internal")
 
 export type Archetype = jecs.Archetype
 export type QueryInner = jecs.QueryInner
@@ -460,6 +461,13 @@ function revy.app()
 	function app:net_add<T, a>(entity: jecs.Entity, component: jecs.Id<T>, first_pair: jecs.Id<a>?)
 		first_pair = first_pair or revy.reliable
 		app.world:add(entity, component)
+
+		if jecs_internal.ECS_IS_PAIR(component) then
+			app.world:add(entity, jecs.pair(first_pair, jecs_internal.ecs_pair_first(app.world, component)))
+		else
+			app.world:add(entity, jecs.pair(first_pair, component))
+		end
+
 		app.world:add(entity, jecs.pair(first_pair, component))
 		return entity
 	end
@@ -467,7 +475,13 @@ function revy.app()
 	function app:net_set<T, a>(entity: jecs.Entity, component: jecs.Id<T>, value: T, first_pair: jecs.Id<a>?)
 		first_pair = first_pair or revy.reliable
 		app.world:set(entity, component, value)
-		app.world:add(entity, jecs.pair(first_pair, component))
+
+		if jecs_internal.ECS_IS_PAIR(component) then
+			app.world:add(entity, jecs.pair(first_pair, jecs_internal.ecs_pair_first(app.world, component)))
+		else
+			app.world:add(entity, jecs.pair(first_pair, component))
+		end
+
 		return entity
 	end
 
