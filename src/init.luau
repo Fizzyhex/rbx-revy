@@ -459,12 +459,13 @@ function revy.app()
 	end
 
 	function app:net_add<T, a>(entity: jecs.Entity, component: jecs.Id<T>, first_pair: jecs.Id<a>?)
-		first_pair = first_pair or revy.reliable
 		app.world:add(entity, component)
 
 		if jecs_internal.ECS_IS_PAIR(component) then
+			first_pair = first_pair or revy.net_pair
 			app.world:add(entity, jecs.pair(first_pair, jecs_internal.ecs_pair_first(app.world, component)))
 		else
+			first_pair = first_pair or revy.reliable
 			app.world:add(entity, jecs.pair(first_pair, component))
 		end
 
@@ -473,12 +474,13 @@ function revy.app()
 	end
 
 	function app:net_set<T, a>(entity: jecs.Entity, component: jecs.Id<T>, value: T, first_pair: jecs.Id<a>?)
-		first_pair = first_pair or revy.reliable
 		app.world:set(entity, component, value)
 
 		if jecs_internal.ECS_IS_PAIR(component) then
+			first_pair = first_pair or revy.net_pair
 			app.world:add(entity, jecs.pair(first_pair, jecs_internal.ecs_pair_first(app.world, component)))
 		else
+			first_pair = first_pair or revy.reliable
 			app.world:add(entity, jecs.pair(first_pair, component))
 		end
 
