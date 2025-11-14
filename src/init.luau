@@ -463,13 +463,12 @@ function revy.app()
 
 		if jecs_internal.ECS_IS_PAIR(component) then
 			first_pair = first_pair or revy.net_pair
-			app.world:add(entity, jecs.pair(first_pair, jecs_internal.ecs_pair_first(app.world, component)))
+			app.world:add(entity, jecs.pair(first_pair, jecs.pair_first(app.world, component)))
 		else
 			first_pair = first_pair or revy.reliable
 			app.world:add(entity, jecs.pair(first_pair, component))
 		end
 
-		app.world:add(entity, jecs.pair(first_pair, component))
 		return entity
 	end
 
@@ -478,7 +477,8 @@ function revy.app()
 
 		if jecs_internal.ECS_IS_PAIR(component) then
 			first_pair = first_pair or revy.net_pair
-			app.world:add(entity, jecs.pair(first_pair, jecs_internal.ecs_pair_first(app.world, component)))
+			local relation = jecs_internal.entity_index_get_alive(jecs_internal.ecs_pair_first(app.world, component))
+			app.world:add(entity, jecs.pair(first_pair, relation))
 		else
 			first_pair = first_pair or revy.reliable
 			app.world:add(entity, jecs.pair(first_pair, component))

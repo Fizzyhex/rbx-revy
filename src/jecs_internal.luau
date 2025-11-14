@@ -53,7 +53,7 @@ type Query<T...> = typeof(setmetatable(
 	{} :: {
 		__iter: Iter<T...>,
 	}
-))
+	))
 
 type QueryArm<T...> = () -> ()
 
@@ -192,15 +192,15 @@ type World = {
 	remove: <T, a>(self: World, id: Entity<T>, component: Id<a>) -> (),
 	--- Retrieves the value of up to 4 components. These values may be nil.
 	get: & (<T, a>(World, Entity<T>, Id<a>) -> a?)
-		& (<T, a, b>(World, Entity<T>, Id<a>, Id<b>) -> (a?, b?))
-		& (<T, a, b, c>(World, Entity<T>, Id<a>, Id<b>, Id<c>) -> (a?, b?, c?))
-		& (<T, a, b, c, d>(World, Entity<T>, Id<a>, Id<b>, Id<c>, Id<d>) -> (a?, b?, c?, d?)),
+	& (<T, a, b>(World, Entity<T>, Id<a>, Id<b>) -> (a?, b?))
+	& (<T, a, b, c>(World, Entity<T>, Id<a>, Id<b>, Id<c>) -> (a?, b?, c?))
+	& (<T, a, b, c, d>(World, Entity<T>, Id<a>, Id<b>, Id<c>, Id<d>) -> (a?, b?, c?, d?)),
 
 	--- Returns whether the entity has the ID.
 	has: (<T, a>(World, Entity<T>, Id<a>) -> boolean)
-		& (<T, a, b>(World, Entity<T>, Id<a>, Id<a>) -> boolean)
-		& (<T, a, b, c>(World, Entity<T>, Id<a>, Id<b>, Id<c>) -> boolean)
-		& <T, a, b, c, d>(World, Entity<T>, Id<a>, Id<b>, Id<c>, Id<d>) -> boolean,
+	& (<T, a, b>(World, Entity<T>, Id<a>, Id<a>) -> boolean)
+	& (<T, a, b, c>(World, Entity<T>, Id<a>, Id<b>, Id<c>) -> boolean)
+	& <T, a, b, c, d>(World, Entity<T>, Id<a>, Id<b>, Id<c>, Id<d>) -> boolean,
 
 	--- Get parent (target of ChildOf relationship) for entity. If there is no ChildOf relationship pair, it will return nil.
 	parent: <T>(self: World, entity: Entity<T>) -> Entity?,
@@ -217,33 +217,33 @@ type World = {
 
 	--- Searches the world for entities that match a given query
 	query: ((World) -> Query<nil>)
-		& (<A>(World, Id<A>) -> Query<A>)
-		& (<A, B>(World, Id<A>, Id<B>) -> Query<A, B>)
-		& (<A, B, C>(World, Id<A>, Id<B>, Id<C>) -> Query<A, B, C>)
-		& (<A, B, C, D>(World, Id<A>, Id<B>, Id<C>, Id<D>) -> Query<A, B, C, D>)
-		& (<A, B, C, D, E>(World, Id<A>, Id<B>, Id<C>, Id<D>, Id<E>) -> Query<A, B, C, D, E>)
-		& (<A, B, C, D, E, F>(World, Id<A>, Id<B>, Id<C>, Id<D>, Id<E>, Id<F>) -> Query<A, B, C, D, E, F>)
-		& (<A, B, C, D, E, F, G>(
-			World,
-			Id<A>,
-			Id<B>,
-			Id<C>,
-			Id<D>,
-			Id<E>,
-			Id<F>,
-			Id<G>
+	& (<A>(World, Id<A>) -> Query<A>)
+	& (<A, B>(World, Id<A>, Id<B>) -> Query<A, B>)
+	& (<A, B, C>(World, Id<A>, Id<B>, Id<C>) -> Query<A, B, C>)
+	& (<A, B, C, D>(World, Id<A>, Id<B>, Id<C>, Id<D>) -> Query<A, B, C, D>)
+	& (<A, B, C, D, E>(World, Id<A>, Id<B>, Id<C>, Id<D>, Id<E>) -> Query<A, B, C, D, E>)
+	& (<A, B, C, D, E, F>(World, Id<A>, Id<B>, Id<C>, Id<D>, Id<E>, Id<F>) -> Query<A, B, C, D, E, F>)
+	& (<A, B, C, D, E, F, G>(
+		World,
+		Id<A>,
+		Id<B>,
+		Id<C>,
+		Id<D>,
+		Id<E>,
+		Id<F>,
+		Id<G>
 		) -> Query<A, B, C, D, E, F, G>)
-		& (<A, B, C, D, E, F, G, H>(
-			World,
-			Id<A>,
-			Id<B>,
-			Id<C>,
-			Id<D>,
-			Id<E>,
-			Id<F>,
-			Id<G>,
-			Id<H>,
-			...Id<any>
+	& (<A, B, C, D, E, F, G, H>(
+		World,
+		Id<A>,
+		Id<B>,
+		Id<C>,
+		Id<D>,
+		Id<E>,
+		Id<F>,
+		Id<G>,
+		Id<H>,
+		...Id<any>
 		) -> Query<A, B, C, D, E, F, G, H>),
 }
 
@@ -278,8 +278,6 @@ type EntityIndex = {
 
 local ECS_ENTITY_MASK =       bit32.lshift(1, 24)
 local ECS_PAIR_OFFSET = 	                 2^48
-
-local jecs = require("@packages/jecs")
 
 local function ECS_ID(e: i53)
 	return e % ECS_ENTITY_MASK
@@ -324,7 +322,7 @@ local function entity_index_is_alive(entity_index: entityindex, entity: i53): bo
 	return entity_index_try_get(entity_index, entity) ~= nil
 end
 
-local function ecs_get_alive(world: jecs.World, entity: i53): i53
+local function ecs_get_alive(world: World, entity: i53): i53
 	if entity == 0 then
 		return 0
 	end
@@ -355,12 +353,12 @@ local function ECS_PAIR_SECOND(e: i53): i24
 	return (e - ECS_PAIR_OFFSET) % ECS_ENTITY_MASK
 end
 
-local function ecs_pair_first(world: jecs.World, e: i53)
+local function ecs_pair_first(world: World, e: i53)
 	local pred = ECS_PAIR_FIRST(e)
 	return ecs_get_alive(world, pred)
 end
 
-local function ecs_pair_second(world: jecs.World, e: i53)
+local function ecs_pair_second(world: World, e: i53)
 	local obj = ECS_PAIR_SECOND(e)
 	return ecs_get_alive(world, obj)
 end
@@ -370,7 +368,8 @@ local function ECS_IS_PAIR(e: number): boolean
 end
 
 return {
-    ECS_IS_PAIR = ECS_IS_PAIR :: any,
-    ecs_pair_first = ecs_pair_first :: any,
-    ecs_pair_second = ecs_pair_second :: any
+	ECS_IS_PAIR = ECS_IS_PAIR :: any,
+	ecs_pair_first = ecs_pair_first :: any,
+	ecs_pair_second = ecs_pair_second :: any,
+	entity_index_get_alive = entity_index_get_alive :: any
 }
