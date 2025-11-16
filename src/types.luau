@@ -72,7 +72,7 @@ export type RevyApp<App = {}> = App & {
 		app.world:add(entity, jecs.pair(pair, component))
 		```
 	]=]
-	net_set: <T, a>(entity: jecs.Entity, component: jecs.Id<T>, value: T, first_pair: jecs.Id<a>?) -> (jecs.Entity),
+	net_set: <T, a>(self: RevyApp<App>, entity: jecs.Entity, component: jecs.Id<T>, value: T, first_pair: jecs.Id<a>?) -> (jecs.Entity),
 
 	-- Text Entities
 	--[=[
