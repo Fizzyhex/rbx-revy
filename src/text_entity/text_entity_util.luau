@@ -18,10 +18,11 @@ local function parse_component_data(
 	parser_context: ParserContext,
 	component: unknown,
 	raw_data: unknown,
-	context: Context
+	context: Context,
+	entity: jecs.Id
 )
 	if parser_context.component_parser_map[component] then
-		return parser_context.component_parser_map[component](raw_data, context)
+		return parser_context.component_parser_map[component](raw_data, context, entity)
 	else
 		return raw_data
 	end
@@ -105,7 +106,7 @@ function text_entity_util.parse(
 			end
 
 			local ok, data = pcall(function()
-				return parse_component_data(parser_context, component, raw_data, context)
+				return parse_component_data(parser_context, component, raw_data, context, entity)
 			end)
 
 			if not ok then
@@ -179,6 +180,15 @@ function text_entity_util.parse(
 					--print("insert pair", entity, pair_name, pair_with_name, pair, pair_with)
 				end
 			end
+		end
+	end
+
+	if text_entity.children then
+		for i, child in text_entity.children do
+			logger_variables[text_entity_util.LOG_TEXT_ENTITY_NAME] = `{logger_variables[text_entity_util.LOG_TEXT_ENTITY_NAME]}.children[{i}]`
+			local child_entity = parser_context.world:entity()
+			parser_context.world:add(child_entity, jecs.pair(jecs.ChildOf, entity))
+			text_entity_util.parse(parser_context, child_entity, child, context, logger_variables)
 		end
 	end
 end

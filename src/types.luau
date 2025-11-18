@@ -30,6 +30,10 @@ export type TextEntityContext = {
 	data: any,
 }
 
+export type ExportContext = {
+	entity: jecs.Entity
+}
+
 export type RevyApp<App = {}> = App & {
 	world: jecs.World,
 

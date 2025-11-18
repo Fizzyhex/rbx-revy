@@ -100,7 +100,7 @@ revy.collect = collect
 revy.interval = interval
 revy.exporters = text_entity_default_parsers
 
-local Export = jecs.component()
+local Export = jecs.component() :: Id<(data: any, context: types.ExportContext) -> any>
 local text_entity_util = require("@self/text_entity/text_entity_util")(Export)
 
 --[=[
@@ -219,13 +219,13 @@ function revy.app()
 		return resources[resource :: any] :: any
 	end
 
-	function app:load_text_entity(entity, text_entity: types.TextEntityContext, context)
+	function app:load_text_entity(entity, text_entity: types.TextEntityContext, context: any)
 		text_entity_util.parse(
 			parser_context,
 			entity,
 			text_entity.data,
 			context,
-			{ [text_entity_util.LOG_TEXT_ENTITY_NAME] = text_entity.name }
+			{ [text_entity_util.LOG_TEXT_ENTITY_NAME] = text_entity.name or nil }
 		)
 		return entity
 	end
