@@ -4,7 +4,7 @@ function text_entity_default_parsers.new_parser(func: (data: any, context: any) 
 	return func
 end
 
-function text_entity_default_parsers.CFrame(data: any): CFrame
+function text_entity_default_parsers.CFrame(data: any, _context, _entity_tree): CFrame
 	if typeof(data) ~= "table" then
 		return CFrame.identity
 	end
@@ -31,7 +31,7 @@ function text_entity_default_parsers.CFrame(data: any): CFrame
 	error("Unrecognised format for CFrame")
 end
 
-function text_entity_default_parsers.Vector3(data: any & { [any]: any }): Vector3
+function text_entity_default_parsers.Vector3(data: any & { [any]: any }, _context, _entity_tree): Vector3
 	assert(
 		typeof(data) == "table",
 		"Vector3s must be arrays of numbers. Examples below.\nfield = [0, 5, 0]\nfield = [] # defaults to 0, 0, 0"
@@ -44,7 +44,7 @@ function text_entity_default_parsers.Vector3(data: any & { [any]: any }): Vector
 	return Vector3.new(data[1], data[2], data[3])
 end
 
-function text_entity_default_parsers.path(path: string, context: Instance): Instance
+function text_entity_default_parsers.path(path: string, context: any): Instance
 	assert(typeof(path) == "string", "expected a string")
 	local current_instance: Instance? = context
 
@@ -65,7 +65,7 @@ function text_entity_default_parsers.path(path: string, context: Instance): Inst
 	return current_instance :: Instance
 end
 
-function text_entity_default_parsers.path_map(data, context: Instance): { [string]: Instance }
+function text_entity_default_parsers.path_map(data: any, context: any, _entity_tree): { [string]: Instance }
 	assert(typeof(data) == "table", "invalid data - if you want to leave this field blank, type {} instead")
 
 	local result = {}

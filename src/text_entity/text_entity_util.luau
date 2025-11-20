@@ -4,7 +4,9 @@ local logger = require("@revy/log/logger")
 
 type Context = any
 type NameComponentMap = { [string]: any }
-type Parser = (data: any, context: Context) -> any
+--- Contains an array of all parent ids of the text entity, if present 
+type EntityTree = { jecs.Entity }
+type Parser = (data: any, context: Context, entity_tree: EntityTree) -> any
 type ComponentParserMap = { [any]: Parser }
 
 type ParserContext = {
@@ -14,15 +16,16 @@ type ParserContext = {
 	pairs: { [string]: unknown },
 }
 
+
 local function parse_component_data(
 	parser_context: ParserContext,
 	component: unknown,
 	raw_data: unknown,
 	context: Context,
-	entity: jecs.Id
+	entity_tree: EntityTree
 )
 	if parser_context.component_parser_map[component] then
-		return parser_context.component_parser_map[component](raw_data, context, entity)
+		return parser_context.component_parser_map[component](raw_data, context, entity_tree)
 	else
 		return raw_data
 	end
@@ -63,8 +66,11 @@ function text_entity_util.parse(
 	entity: jecs.Entity,
 	text_entity: any,
 	context: Context,
-	logger_variables
+	logger_variables,
+	entity_tree: EntityTree?
 )
+	entity_tree = entity_tree or {}
+	table.insert(entity_tree, entity)
 	local networked = {}
 
 	if text_entity.net_components then
@@ -106,7 +112,7 @@ function text_entity_util.parse(
 			end
 
 			local ok, data = pcall(function()
-				return parse_component_data(parser_context, component, raw_data, context, entity)
+				return parse_component_data(parser_context, component, raw_data, context, entity_tree :: EntityTree)
 			end)
 
 			if not ok then
@@ -188,7 +194,7 @@ function text_entity_util.parse(
 			logger_variables[text_entity_util.LOG_TEXT_ENTITY_NAME] = `{logger_variables[text_entity_util.LOG_TEXT_ENTITY_NAME]}.children[{i}]`
 			local child_entity = parser_context.world:entity()
 			parser_context.world:add(child_entity, jecs.pair(jecs.ChildOf, entity))
-			text_entity_util.parse(parser_context, child_entity, child, context, logger_variables)
+			text_entity_util.parse(parser_context, child_entity, child, context, logger_variables, entity_tree)
 		end
 	end
 end

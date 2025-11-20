@@ -100,7 +100,7 @@ revy.collect = collect
 revy.interval = interval
 revy.exporters = text_entity_default_parsers
 
-local Export = jecs.component() :: Id<(data: any, context: types.ExportContext) -> any>
+local Export = jecs.component() :: Id
 local text_entity_util = require("@self/text_entity/text_entity_util")(Export)
 
 --[=[
@@ -113,6 +113,13 @@ function revy.text_entity(data: any, name: string?): types.TextEntityContext
 		data = data,
 		name = name,
 	}
+end
+
+--[=[
+	Sugar for `revy.ecs.meta(component, revy.Export, exporter_fn)` - but may provide better types.
+]=]
+function revy.set_exporter(id: jecs.Id, exporter: types.TextEntityExporter)
+	return jecs.meta(id, revy.Export, exporter)
 end
 
 function revy.system(id: string, func: (world: jecs.World) -> ())
@@ -251,7 +258,7 @@ function revy.app()
 			end
 
 			local system_fn = system_utils.to_planck(module)
-			local system_table = { system = system_fn, phase = schedule }
+			local system_table = { system = system_fn, phase = phase }
 
 			system_map[module.id] = system_table
 
