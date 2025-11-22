@@ -529,7 +529,7 @@ revy.net_pair = replecs.pair
 --- Alias for `revy.network.custom` / `replecs.custom`
 revy.net_custom = replecs.custom
 --- Alias for `revy.network.custom_handler` / `replecs.custom_handler`
-revy.net_custom_handler = replecs.custom_handler
+revy.net_custom_handler = replecs.custom_handler :: Id -- this doesn't type well in the new solver currently.
 --- Alias for `revy.network.global` / `replecs.global`
 revy.net_global = replecs.global
 
