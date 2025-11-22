@@ -518,14 +518,20 @@ revy.renderer = Renderer
 --- A built-in component that represents object transforms.
 revy.transform = Transform
 
---- Alias for `revy.network.networked`
-revy.networked = replecs.networked :: typeof(jecs.tag())
---- Alias for `revy.network.reliable`
-revy.reliable = replecs.reliable :: typeof(jecs.tag())
---- Alias for `revy.network.unreliable`
-revy.unreliable = replecs.unreliable :: typeof(jecs.tag())
---- Alias for `revy.network.pair`
-revy.net_pair = replecs.pair :: typeof(jecs.tag())
+--- Alias for `revy.network.networked` / `replecs.networked`
+revy.networked = replecs.networked
+--- Alias for `revy.network.reliable` / `replecs.reliable`
+revy.reliable = replecs.reliable
+--- Alias for `revy.network.unreliable` / `replecs.unreliable`
+revy.unreliable = replecs.unreliable
+--- Alias for `revy.network.pair` / `replecs.pair`
+revy.net_pair = replecs.pair
+--- Alias for `revy.network.custom` / `replecs.custom`
+revy.net_custom = replecs.custom
+--- Alias for `revy.network.custom_handler` / `replecs.custom_handler`
+revy.net_custom_handler = replecs.custom_handler
+--- Alias for `revy.network.global` / `replecs.global`
+revy.net_global = replecs.global
 
 --- This is Replecs. Docs: https://pepeeltoro41.github.io/replecs/
 revy.network = replecs
