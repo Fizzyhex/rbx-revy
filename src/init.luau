@@ -130,7 +130,6 @@ end
 
 function revy.system(id: string, func: (world: jecs.World) -> ())
 	local system: types.System = { type = "revy_system", id = id, system = func :: SystemFn }
-	table.freeze(system)
 	return system
 end
 
