@@ -501,8 +501,6 @@ function revy.app()
 	end
 
 	app:add_plugins(revy.plugins.time_plugin)
-	table.freeze(app)
-
 	return app
 end
 
