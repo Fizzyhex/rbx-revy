@@ -109,6 +109,12 @@ local text_entity_util = require("@self/text_entity/text_entity_util")(Export)
 	Provide a name for improved logging.
 ]=]
 function revy.text_entity(data: any, name: string?): types.TextEntityContext
+	for _, value in data do
+		if typeof(value) == "table" and not table.isfrozen(value) then
+			table.freeze(value)
+		end
+	end
+
 	return {
 		data = data,
 		name = name,

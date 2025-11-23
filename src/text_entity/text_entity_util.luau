@@ -24,6 +24,10 @@ local function parse_component_data(
 	entity_tree: EntityTree
 )
 	if parser_context.component_parser_map[component] then
+		if typeof(raw_data) == "table" and not table.isfrozen(raw_data) then
+			table.freeze(raw_data)
+		end
+
 		return parser_context.component_parser_map[component](raw_data, context, entity_tree)
 	else
 		return raw_data
@@ -68,13 +72,15 @@ function text_entity_util.parse(
 	logger_variables,
 	entity_tree: EntityTree?
 )
+	local components = (text_entity.components or {}) :: { [any]: any }
+	local tags = (text_entity.tags or {}) :: { [any]: any }
+
 	entity_tree = entity_tree or {}
 	table.insert(entity_tree, entity)
 	local networked = {}
 
 	if text_entity.net_components then
-		local components = (text_entity.components or {}) :: { [any]: any }
-		text_entity.components = components
+		components = table.clone(components)
 
 		for component_name, raw_data in text_entity.net_components do
 			components[component_name] = raw_data
@@ -85,8 +91,7 @@ function text_entity_util.parse(
 	end
 
 	if text_entity.net_tags then
-		local tags = (text_entity.tags or {}) :: { [any]: any }
-		text_entity.tags = tags
+		tags = table.clone(tags)
 
 		for _, tag in text_entity.net_tags do
 			table.insert(tags, tag)
@@ -96,59 +101,53 @@ function text_entity_util.parse(
 		parser_context.world:add(entity, replecs.networked)
 	end
 
-	if text_entity.components then
-		for component_name, raw_data in text_entity.components do
-			local component = parser_context.name_component_map[component_name]
+	for component_name, raw_data in components do
+		local component = parser_context.name_component_map[component_name]
 
-			if component == nil then
-				local warn = logger.inject_variables(logger.lib_warn, logger_variables)
+		if component == nil then
+			local warn = logger.inject_variables(logger.lib_warn, logger_variables)
 
-				warn(
-					`{SOURCE}{text_entity_path("components", component_name)} could not be found - has it been assigned a jecs.Name?`
-				)
-				did_you_mean(warn, parser_context, component_name)
-				continue
-			end
+			warn(
+				`{SOURCE}{text_entity_path("components", component_name)} could not be found - has it been assigned a jecs.Name?`
+			)
+			did_you_mean(warn, parser_context, component_name)
+			continue
+		end
 
-			local ok, data = pcall(function()
-				return parse_component_data(parser_context, component, raw_data, context, entity_tree :: EntityTree)
-			end)
+		local ok, data = pcall(function()
+			return parse_component_data(parser_context, component, raw_data, context, entity_tree :: EntityTree)
+		end)
 
-			if not ok then
-				local warn = logger.inject_variables(logger.lib_warn, logger_variables)
-				warn(
-					`{SOURCE}{text_entity_path("components", component_name)} contains invalid data and cannot be loaded!`
-				)
-				logger.indent(warn)(data)
-				warn(`trace: {debug.traceback()}`)
-				continue
-			end
+		if not ok then
+			local warn = logger.inject_variables(logger.lib_warn, logger_variables)
+			warn(`{SOURCE}{text_entity_path("components", component_name)} contains invalid data and cannot be loaded!`)
+			logger.indent(warn)(data)
+			warn(`trace: {debug.traceback()}`)
+			continue
+		end
 
-			parser_context.world:set(entity, component, data)
+		parser_context.world:set(entity, component, data)
 
-			if networked[component_name] then
-				parser_context.world:add(entity, jecs.pair(replecs.reliable, component))
-			end
+		if networked[component_name] then
+			parser_context.world:add(entity, jecs.pair(replecs.reliable, component))
 		end
 	end
 
-	if text_entity.tags then
-		for _, tag_name in text_entity.tags do
-			local tag = parser_context.name_component_map[tag_name]
+	for _, tag_name in tags do
+		local tag = parser_context.name_component_map[tag_name]
 
-			if not tag then
-				local warn = logger.inject_variables(logger.lib_warn, logger_variables)
-				warn(`{SOURCE}tag {tag_name} could not be found - has it been assigned a jecs.Name?`)
-				did_you_mean(warn, parser_context, tag_name)
-				continue
-			end
+		if not tag then
+			local warn = logger.inject_variables(logger.lib_warn, logger_variables)
+			warn(`{SOURCE}tag {tag_name} could not be found - has it been assigned a jecs.Name?`)
+			did_you_mean(warn, parser_context, tag_name)
+			continue
+		end
 
-			parser_context.world:add(entity, tag)
-			--print("insert tag", entity, tag_name, tag)
+		parser_context.world:add(entity, tag)
+		--print("insert tag", entity, tag_name, tag)
 
-			if networked[tag_name] then
-				parser_context.world:add(entity, jecs.pair(replecs.reliable, tag))
-			end
+		if networked[tag_name] then
+			parser_context.world:add(entity, jecs.pair(replecs.reliable, tag))
 		end
 	end
 
