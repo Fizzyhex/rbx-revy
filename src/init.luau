@@ -124,6 +124,7 @@ end
 
 function revy.system(id: string, func: (world: jecs.World) -> ())
 	local system: types.System = { type = "revy_system", id = id, system = func :: SystemFn }
+	table.freeze(system)
 	return system
 end
 
@@ -495,6 +496,7 @@ function revy.app()
 	end
 
 	app:add_plugins(revy.plugins.time_plugin)
+	table.freeze(app)
 
 	return app
 end

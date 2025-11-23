@@ -25,9 +25,9 @@ type EventConsumerCachedQuery<T> = jecs.Query<T> & { __cached_event_query: true 
 --- an event consumer is an interface for querying events in the world.
 export type EventConsumer = {
 	--- collects all of an event. use `collect_cached` if applicable for better performance.
-	collect: <T>(self: EventConsumer, event_id: jecs.Id<T>) -> (() -> (jecs.Id?, T?)),
+	collect: <T>(self: EventConsumer, event_id: jecs.Id<T>) -> () -> (jecs.Id?, T?),
 	--- collects all of an event - caching queries internally for performance.
-	collect_cached: <T>(self: EventConsumer, cached_event: EventConsumerCachedQuery<T>?) -> (() -> (jecs.Id?, T)),
+	collect_cached: <T>(self: EventConsumer, cached_event: EventConsumerCachedQuery<T>?) -> () -> (jecs.Id?, T),
 	--- caches an event for use with `collect_cached`.
 	cache_event: <T>(self: EventConsumer, event_id: jecs.Id<T>) -> EventConsumerCachedQuery<T>,
 }

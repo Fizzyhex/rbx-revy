@@ -4,7 +4,7 @@ local logger = require("@revy/log/logger")
 
 type Context = any
 type NameComponentMap = { [string]: any }
---- Contains an array of all parent ids of the text entity, if present 
+--- Contains an array of all parent ids of the text entity, if present
 type EntityTree = { jecs.Entity }
 type Parser = (data: any, context: Context, entity_tree: EntityTree) -> any
 type ComponentParserMap = { [any]: Parser }
@@ -15,7 +15,6 @@ type ParserContext = {
 	component_parser_map: ComponentParserMap,
 	pairs: { [string]: unknown },
 }
-
 
 local function parse_component_data(
 	parser_context: ParserContext,
@@ -74,9 +73,9 @@ function text_entity_util.parse(
 	local networked = {}
 
 	if text_entity.net_components then
-		local components = (text_entity.components or {}) :: { [any]:any }
+		local components = (text_entity.components or {}) :: { [any]: any }
 		text_entity.components = components
-		
+
 		for component_name, raw_data in text_entity.net_components do
 			components[component_name] = raw_data
 			networked[component_name] = true
@@ -86,9 +85,9 @@ function text_entity_util.parse(
 	end
 
 	if text_entity.net_tags then
-		local tags = (text_entity.tags or {}) :: { [any]:any }
+		local tags = (text_entity.tags or {}) :: { [any]: any }
 		text_entity.tags = tags
-		
+
 		for _, tag in text_entity.net_tags do
 			table.insert(tags, tag)
 			networked[tag] = true
@@ -121,6 +120,7 @@ function text_entity_util.parse(
 					`{SOURCE}{text_entity_path("components", component_name)} contains invalid data and cannot be loaded!`
 				)
 				logger.indent(warn)(data)
+				warn(`trace: {debug.traceback()}`)
 				continue
 			end
 
@@ -191,7 +191,8 @@ function text_entity_util.parse(
 
 	if text_entity.children then
 		for i, child in text_entity.children do
-			logger_variables[text_entity_util.LOG_TEXT_ENTITY_NAME] = `{logger_variables[text_entity_util.LOG_TEXT_ENTITY_NAME]}.children[{i}]`
+			logger_variables[text_entity_util.LOG_TEXT_ENTITY_NAME] =
+				`{logger_variables[text_entity_util.LOG_TEXT_ENTITY_NAME]}.children[{i}]`
 			local child_entity = parser_context.world:entity()
 			parser_context.world:add(child_entity, jecs.pair(jecs.ChildOf, entity))
 			text_entity_util.parse(parser_context, child_entity, child, context, logger_variables, entity_tree)

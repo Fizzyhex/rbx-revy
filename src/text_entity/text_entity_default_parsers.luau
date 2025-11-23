@@ -19,8 +19,7 @@ function text_entity_default_parsers.CFrame(data: any, _context, _entity_tree): 
 
 	assert(
 		typeof(data.orientation == "table"),
-		"orientation must be an array of numbers. examples below:"
-			.. "- cframe = { position = [0, 0, 0], orientation = [0, 0, 0] }"
+		[[orientation must be an array of numbers. examples below:- cframe = { position = [0, 0, 0], orientation = [0, 0, 0] }]]
 	)
 
 	if (data.orientation :: { any })[1] == "number" then
@@ -45,7 +44,7 @@ function text_entity_default_parsers.Vector3(data: any & { [any]: any }, _contex
 end
 
 function text_entity_default_parsers.path(path: string, context: any): Instance
-	assert(typeof(path) == "string", "expected a string")
+	assert(typeof(path) == "string", `tostring(path) == {path} // typeof(path) == {typeof(path)} - expected a string`)
 	local current_instance: Instance? = context
 
 	if path:sub(1, 1) == "/" then
