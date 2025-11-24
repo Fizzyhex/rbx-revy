@@ -89,6 +89,11 @@ local unreliables_interval = interval(1 / 30)
 
 local PLANCK_INJECTION_KEY = "revy_id"
 
+local function system_set_interval(system: System, value: number)
+	system.interval = value
+	return system
+end
+
 local revy = {
 	--- This is Jecs. Docs: https://ukendio.github.io/jecs/
 	ecs = jecs,
@@ -109,12 +114,6 @@ local text_entity_util = require("@self/text_entity/text_entity_util")(Export)
 	Provide a name for improved logging.
 ]=]
 function revy.text_entity(data: any, name: string?): types.TextEntityContext
-	for _, value in data do
-		if typeof(value) == "table" and not table.isfrozen(value) then
-			table.freeze(value)
-		end
-	end
-
 	return {
 		data = data,
 		name = name,
@@ -129,7 +128,8 @@ function revy.set_exporter(id: jecs.Id, exporter: types.TextEntityExporter)
 end
 
 function revy.system(id: string, func: (world: jecs.World) -> ())
-	local system: types.System = { type = "revy_system", id = id, system = func :: SystemFn }
+	local system: types.System =
+		{ type = "revy_system", id = id, system = func :: SystemFn, set_interval = system_set_interval }
 	return system
 end
 
@@ -255,6 +255,23 @@ function revy.app()
 		local phase = schedule_phase_map[schedule]
 		assert(phase, `Invalid schedule '{schedule}'`)
 
+		local function load(system: System)
+			local system_fn = system_utils.to_planck(system)
+			local system_table = { system = system_fn, phase = phase }
+
+			system_map[system.id] = system_table
+
+			if system_loading_behaviour == "queue" then
+				system_loading_queue[system.id] = system_table
+			else
+				add_system(system.id, system_table)
+
+				if system.interval then
+					scheduler:addRunCondition(system_table, interval(system.interval))
+				end
+			end
+		end
+
 		for _, module in { ... } do
 			if module.type ~= "revy_system" then
 				logger.lib_warn(
@@ -263,16 +280,7 @@ function revy.app()
 				continue
 			end
 
-			local system_fn = system_utils.to_planck(module)
-			local system_table = { system = system_fn, phase = phase }
-
-			system_map[module.id] = system_table
-
-			if system_loading_behaviour == "queue" then
-				system_loading_queue[module.id] = system_table
-			else
-				add_system(module.id, system_table)
-			end
+			load(module :: System)
 		end
 
 		return self
@@ -404,11 +412,11 @@ function revy.app()
 
 					for key in old_systems do
 						if new_systems[key] then
-							-- replace
+							-- replace system
 							print(`> {key}`)
 							replace_or_add_system(key, new_systems[key])
 						else
-							-- remove
+							-- remove system
 							print(`- {key}`)
 							remove_system(key)
 						end
@@ -416,7 +424,7 @@ function revy.app()
 
 					for key, value in new_systems do
 						if not old_systems[key] then
-							-- add
+							-- add system
 							print(`+ {key}`)
 							add_system(key, value)
 						end

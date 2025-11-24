@@ -15,7 +15,13 @@ export type Signal<T... = ...any> = {
 type OptionalPluginCleanup = () -> ()?
 export type PluginBuildFn<T> = (app: T) -> OptionalPluginCleanup | never
 
-export type System = { type: "revy_system", id: string, system: SystemFn }
+export type System = {
+	type: "revy_system",
+	id: string,
+	system: SystemFn,
+	interval: number?,
+	set_interval: (self: System, interval: number) -> System,
+}
 
 export type Plugin<App> = {
 	type: "revy_plugin",
@@ -30,7 +36,7 @@ export type TextEntityContext = {
 	data: any,
 }
 
-export type TextEntityExporter = (data: any, entity_tree: { jecs.Entity }) -> (any)
+export type TextEntityExporter = (data: any, entity_tree: { jecs.Entity }) -> any
 export type TextEntityExport = jecs.Id<TextEntityExporter>
 
 export type RevyApp<App = {}> = App & {
@@ -65,7 +71,12 @@ export type RevyApp<App = {}> = App & {
 		app.world:add(entity, jecs.pair(pair, component))
 		```
 	]=]
-	net_add: <T, a>(self: RevyApp<App>, entity: jecs.Entity, component: jecs.Id<T>, first_pair: jecs.Id<a>?) -> (jecs.Entity),
+	net_add: <T, a>(
+		self: RevyApp<App>,
+		entity: jecs.Entity,
+		component: jecs.Id<T>,
+		first_pair: jecs.Id<a>?
+	) -> jecs.Entity,
 	--[=[
 		Similar to `world:add`, but also adds a pair between `revy.reliable` (or an optionally provided `first_pair`) and your component.
 
@@ -75,7 +86,13 @@ export type RevyApp<App = {}> = App & {
 		app.world:add(entity, jecs.pair(pair, component))
 		```
 	]=]
-	net_set: <T, a>(self: RevyApp<App>, entity: jecs.Entity, component: jecs.Id<T>, value: T, first_pair: jecs.Id<a>?) -> (jecs.Entity),
+	net_set: <T, a>(
+		self: RevyApp<App>,
+		entity: jecs.Entity,
+		component: jecs.Id<T>,
+		value: T,
+		first_pair: jecs.Id<a>?
+	) -> jecs.Entity,
 
 	-- Text Entities
 	--[=[

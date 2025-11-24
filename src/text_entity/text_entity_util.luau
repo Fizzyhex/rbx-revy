@@ -19,13 +19,13 @@ type ParserContext = {
 local function parse_component_data(
 	parser_context: ParserContext,
 	component: unknown,
-	raw_data: unknown,
+	raw_data: any,
 	context: Context,
 	entity_tree: EntityTree
 )
 	if parser_context.component_parser_map[component] then
 		if typeof(raw_data) == "table" and not table.isfrozen(raw_data) then
-			table.freeze(raw_data)
+			table.freeze(raw_data :: any)
 		end
 
 		return parser_context.component_parser_map[component](raw_data, context, entity_tree)
@@ -69,7 +69,7 @@ function text_entity_util.parse(
 	entity: jecs.Entity,
 	text_entity: any,
 	context: Context,
-	logger_variables,
+	logger_variables: { [any]: any },
 	entity_tree: EntityTree?
 )
 	local components = (text_entity.components or {}) :: { [any]: any }
