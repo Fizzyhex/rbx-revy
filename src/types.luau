@@ -3,6 +3,8 @@ local planck = require("@packages/planck")
 local replecs = require("@packages/replecs")
 local event_util = require("@revy/events/event_util")
 
+export type Phase = planck.Phase
+export type SystemTable = planck.SystemTable<>
 export type SystemFn = planck.SystemFn<>
 
 export type Signal<T... = ...any> = {
@@ -13,20 +15,34 @@ export type Signal<T... = ...any> = {
 }
 
 type OptionalPluginCleanup = () -> ()?
-export type PluginBuildFn<T> = (app: T) -> OptionalPluginCleanup | never
+
+--- User defined function that configures the plugin's data and (optionally) describes how to clean it up for hot-reloading.
+export type PluginBuildFn<T> = (plugin: T) -> OptionalPluginCleanup | never
 
 export type System = {
 	type: "revy_system",
 	id: string,
 	system: SystemFn,
-	interval: number?,
-	set_interval: (self: System, interval: number) -> System,
+	-- interval: number?,
+	-- set_interval: (self: System, interval: number) -> System,
+}
+
+export type PluginDef<App> = {
+	type: "revy_plugin_def",
+	id: string,
+	build: PluginBuildFn<Plugin<RevyApp>>,
 }
 
 export type Plugin<App> = {
 	type: "revy_plugin",
 	id: string,
-	build: PluginBuildFn<App>,
+	schedule: { [Schedule]: { [string]: System } },
+	next_number: number,
+	app: App,
+	acquire_resources: <T...>(plugin: Plugin<App>, fn: (T...) -> (), T...) -> (),
+	--- Adds a new system to be scheduled with a unique id. Create new systems with `revy.system`.
+	add_system: (plugin: Plugin<App>, schedule: Schedule, def: System) -> (),
+	cleanup: () -> (),
 }
 
 export type Resource<T = any> = string & { __T: T }
@@ -44,9 +60,6 @@ export type RevyApp<App = {}> = App & {
 
 	-- Networking
 	network: replecs.ReplecsLib,
-
-	-- Scheduler
-	add_systems: (self: RevyApp<App>, schedule: Schedule, ...System) -> RevyApp<App>,
 
 	-- Debugging
 	open_debugger: (self: RevyApp<App>) -> RevyApp<App>,
@@ -161,7 +174,7 @@ Default exporters can be found in `revy.exporters` - have a look before making y
 
 -- Anything that can only happen before an app is ran goes here
 export type RevyAppCommands = RevyApp<{
-	add_plugins: (self: RevyAppCommands, ...Plugin<RevyApp>) -> RevyAppCommands,
+	add_plugins: (self: RevyAppCommands, ...PluginDef<RevyApp>) -> RevyAppCommands,
 	enable_hot_reloading: (self: RevyAppCommands, container: Instance) -> RevyAppCommands,
 
 	--[=[

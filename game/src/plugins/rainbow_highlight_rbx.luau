@@ -3,10 +3,10 @@ local game_components = require("../game_components")
 
 local CYCLE_SPEED = 0.25
 
-local function rainbow_highlight_plugin(app: revy.RevyApp)
-	app:add_systems(
+return revy.plugin("game.rainbow_highlight_rbx", function(plugin)
+	plugin:add_system(
 		"update",
-		revy.system("game.rainbow_highlight_rbx.update", function(world)
+		revy.system(function(world)
 			for id, _rainbow_highlight, renderer in
 				world
 					:query(game_components.RainbowHighlight, game_components.Renderer)
@@ -30,6 +30,4 @@ local function rainbow_highlight_plugin(app: revy.RevyApp)
 	)
 
 	return nil
-end
-
-return revy.plugin("game.rainbow_highlight_rbx", rainbow_highlight_plugin)
+end)

@@ -2,19 +2,21 @@ local revy = require("@revy")
 local game_types = require("../game_types")
 local game_components = require("../game_components")
 
-local function insert_renderers(app: revy.RevyApp)
-	local unsub_added = app.world:added(game_components.Renderer, function(id, _component, modle: unknown)
-		assert(typeof(modle) == "Instance")
-		assert(modle:IsA("Model"))
+return revy.plugin("game.insert_renderers", function(plugin)
+	local app = plugin.app
 
-		if not modle:IsDescendantOf(game) then
+	local unsub_added = app.world:added(game_components.Renderer, function(id, _component, model: unknown)
+		assert(typeof(model) == "Instance")
+		assert(model:IsA("Model"))
+
+		if not model:IsDescendantOf(game) then
 			local transform = app.world:get(id, game_components.Transform)
 
 			if transform then
-				modle:PivotTo(transform)
+				model:PivotTo(transform)
 			end
 
-			modle.Parent = workspace
+			model.Parent = workspace
 		end
 	end)
 
@@ -31,6 +33,4 @@ local function insert_renderers(app: revy.RevyApp)
 		unsub_added()
 		unsub_removed()
 	end
-end
-
-return revy.plugin("game.insert_renderers", insert_renderers)
+end)

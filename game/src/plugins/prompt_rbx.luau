@@ -3,10 +3,12 @@ local game_types = require("../game_types")
 local game_components = require("../game_components")
 
 -- TODO: Register prompt events here
-return revy.plugin("game.prompt_rbx", function(app: revy.RevyApp)
-	app:add_systems(
+return revy.plugin("game.prompt_rbx", function(plugin)
+	local app = plugin.app
+
+	plugin:add_system(
 		"first",
-		revy.system("game.prompt_rbx.first", function(world: revy.World)
+		revy.system(function(world: revy.World)
 			for entity, prompt_rbx in world:query(game_components.PromptRbx):without(game_components.PromptConnection) do
 				local collect, connection = revy.collect(prompt_rbx.Triggered)
 				world:set(entity, game_components.PromptConnection, { collect = collect, connection = connection })

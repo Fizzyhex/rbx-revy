@@ -4,20 +4,18 @@ local revy = require("@revy")
 local dialog_resource_plugin = require("./dialog_resource_plugin")
 local game_components = require("../game_components")
 
-return revy.plugin("game.dialog_prompt", function(app: revy.RevyApp)
+return revy.plugin("game.dialog_cycler", function(plugin)
+	local app = plugin.app
 	local event_consumer = app:event_consumer()
 	local dialog_resource: dialog_resource_plugin.DialogResourceData
 
-	app:add_systems(
-		"start",
-		revy.system("game.dialog_prompt.start", function()
-			dialog_resource = app:get_resource(dialog_resource_plugin.RESOURCE)
-		end)
-	)
+	plugin:acquire_resources(function(...)
+		dialog_resource = ...
+	end, dialog_resource_plugin.RESOURCE)
 
-	app:add_systems(
+	plugin:add_system(
 		"update",
-		revy.system("game.dialog_prompt.update", function(world)
+		revy.system(function(world)
 			for id in event_consumer:collect(game_components.PromptTriggeredEvent) do
 				local dialog_cycler, dialog =
 					world:get(id, game_components.DialogCycler), world:get(id, game_components.Dialog)

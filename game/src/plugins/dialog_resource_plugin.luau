@@ -12,7 +12,8 @@ type DialogResource = revy.Resource<DialogResourceData>
 local RESOURCE = revy.resource("game.dialog_resource") :: DialogResource
 
 return {
-	plugin = revy.plugin("game.dialog_resource", function(app: revy.RevyApp)
+	plugin = revy.plugin("game.dialog_resource", function(plugin)
+		local app = plugin.app
 		local data = {} :: DialogResourceData
 
 		function data.say(entity, text)
