@@ -4,21 +4,22 @@ local revy = require("@revy")
 local dialog_resource_plugin = require("./dialog_resource_plugin")
 local game_components = require("../game_components")
 
-return revy.plugin("game.dialog_randomiser", function(app: revy.RevyApp)
+return revy.plugin("game.dialog_randomiser", function(plugin)
+	local app = plugin.app
 	local event_consumer = app:event_consumer()
 	local prompt_trigger_event = event_consumer:cache_event(game_components.PromptTriggeredEvent)
 	local dialog_resource: dialog_resource_plugin.DialogResourceData
 
-	app:add_systems(
+	plugin:add_system(
 		"start",
-		revy.system("game.dialog_randomiser.load_resources", function()
+		revy.system(function()
 			dialog_resource = app:get_resource(dialog_resource_plugin.RESOURCE)
 		end)
 	)
 
-	app:add_systems(
+	plugin:add_system(
 		"update",
-		revy.system("game.dialog_randomiser.update", function(world)
+		revy.system(function(world: revy.World)
 			for id in event_consumer:collect_cached(prompt_trigger_event) do
 				local dialog, dialog_randomiser =
 					world:get(id, game_components.Dialog), world:get(id, game_components.DialogRandomiser)

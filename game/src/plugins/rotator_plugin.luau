@@ -1,10 +1,12 @@
 local revy = require("@revy")
 local game_components = require("../game_components")
 
-local function rotator_plugin(app: revy.RevyApp)
-	app:add_systems(
+return revy.plugin("game.rotator", function(plugin)
+	local app = plugin.app
+
+	plugin:add_system(
 		"update",
-		revy.system("game.rotator.spin", function(world)
+		revy.system(function(world)
 			local time = app:get_resource(revy.resources.time)
 
 			for _, rotator, renderer in world:query(game_components.Rotator, game_components.Renderer) do
@@ -16,9 +18,9 @@ local function rotator_plugin(app: revy.RevyApp)
 		end)
 	)
 
-	app:add_systems(
+	plugin:add_system(
 		"update",
-		revy.system("game.rotator.velocity", function(world)
+		revy.system(function(world)
 			for _, rotator, renderer in world:query(game_components.Rotator, game_components.Renderer) do
 				if not renderer.PrimaryPart then
 					continue
@@ -30,6 +32,4 @@ local function rotator_plugin(app: revy.RevyApp)
 	)
 
 	return nil
-end
-
-return revy.plugin("game.rotator", rotator_plugin)
+end)

@@ -9,14 +9,15 @@ assert(script.Parent)
 assert(script.Parent.Parent)
 local container = script.Parent.Parent:WaitForChild("data")
 
-local function streamable_plugin(app: revy.RevyApp)
+return revy.plugin("game.streamable", function(plugin)
+	local app = plugin.app
 	local to_collect = CollectionService:GetTagged(TAG)
 	local on_added = revy.collect(CollectionService:GetInstanceAddedSignal(TAG))
 	local on_removed = revy.collect(CollectionService:GetInstanceRemovedSignal(TAG))
 
-	app:add_systems(
+	plugin:add_system(
 		"update",
-		revy.system("game.streamable.update", function(world)
+		revy.system(function(world)
 			for tagged in on_added do
 				table.insert(to_collect, tagged)
 			end
@@ -72,6 +73,4 @@ local function streamable_plugin(app: revy.RevyApp)
 	)
 
 	return nil
-end
-
-return revy.plugin("game.streamable", streamable_plugin)
+end)

@@ -1,13 +1,12 @@
 -- cycles thru dialog in-order when prompted
 
 local revy = require("@revy")
-local dialog_resource_plugin = require("./dialog_resource_plugin")
 local game_components = require("../game_components")
 
-return revy.plugin("game.dialog_prompt_inserter", function(app: revy.RevyApp)
-	app:add_systems(
+return revy.plugin("game.dialog_prompt_inserter", function(plugin)
+	plugin:add_system(
 		"update",
-		revy.system("game.dialog_prompt_inserter.update", function(world)
+		revy.system(function(world)
 			for id, _dialog, renderer in
 				world:query(game_components.Dialog, game_components.Renderer):without(game_components.PromptRbx)
 			do
