@@ -280,6 +280,12 @@ function revy.app()
 				continue
 			end
 
+			if typeof(module.id) == "string" and system_map[module.id] then
+				warn(
+					`system.id == {module.id} - this is already registered and your duplicate will break hot-reloading. {debug.traceback()}`
+				)
+			end
+
 			load(module :: System)
 		end
 

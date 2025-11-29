@@ -40,7 +40,7 @@ shared = "game.ReplicatedStorage.Packages"
 [dependencies]
 jecs = { wally = "ukendio/jecs", version = "0.9.0" }
 replecs = { wally = "pepeeltoro41/replecs", version = "^0.2.2" }
-planck = { wally = "yetanotherclown/planck", version = "^0.2.0" }
+planck = { wally = "yetanotherclown/planck", version = "^0.3.0-alpha.1" }
 planck_jabby = { wally = "yetanotherclown/planck-jabby", version = "^0.2.0" }
 planck_runservice = { wally = "yetanotherclown/planck-runservice", version = "^0.2.0" }
 rewire = { wally = "sayhisam1/rewire", version = "^0.3.0" }
