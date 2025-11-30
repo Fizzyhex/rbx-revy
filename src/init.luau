@@ -42,7 +42,6 @@ local collect = require("@self/collect")
 local interval = require("@self/interval")
 local new_plugin = require("@self/new_plugin")
 local remotes = require("@self/remotes")
-local system_utils = require("@self/system_utils")
 local types = require("@self/types")
 local bundles = require("@self/bundles/bundles")
 local jecs_internal = require("@self/jecs_internal")
@@ -321,13 +320,14 @@ function revy.app()
 			for system_uid, system in systems do
 				local existing = loaded_systems[system_uid]
 				local system_table = new_system_table(schedule, system)
+				system_table.name = system_uid
 
 				if existing then
 					log(`replacing existing system {system_uid}`)
 					scheduler:replaceSystem(existing.system_table, system_table)
 				else
 					log(`adding new system {system_uid}`)
-					scheduler:addSystems(system_table, phase_from_schedule(schedule))
+					scheduler:addSystem(system_table)
 				end
 
 				successful_loads[system_uid] = true
@@ -379,7 +379,15 @@ function revy.app()
 			name = "Revy World",
 			configuration = {
 				world = app.world,
-				entities = entity_instance_map,
+				get_entity_from_part = function(part)
+					while part.Parent do
+						if entity_instance_map[part] then
+							return entity_instance_map[part], part
+						end
+
+						part = part.Parent
+					end
+				end,
 			},
 		})
 

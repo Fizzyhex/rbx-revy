@@ -9,7 +9,7 @@ end
 
 local function schedule_system(plugin: Plugin, schedule: types.Schedule, def: types.System)
 	plugin.schedule[schedule] = plugin.schedule[schedule] or {}
-	local schedule_id = `{plugin.id}.{def.id} (⟳ {schedule}) #{next_number(plugin)}`
+	local schedule_id = `{plugin.id} > {def.id} ({schedule} {next_number(plugin)})`
 	assert(plugin.schedule[schedule][schedule_id] == nil, `schedule already contains {schedule_id}!`)
 	plugin.schedule[schedule][schedule_id] = def
 end
