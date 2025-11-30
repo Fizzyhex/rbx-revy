@@ -28,7 +28,7 @@ local function acquire_resources<T...>(plugin: Plugin, fn: (T...) -> (), ...: T.
 				gathered[index] = plugin.app:get_resource(id :: any)
 			end
 
-			fn(table.unpack(gathered) :: any)
+			fn(table.unpack(gathered))
 		end,
 	})
 end
