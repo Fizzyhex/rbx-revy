@@ -274,7 +274,6 @@ function revy.app()
 			phase = phase_from_schedule(schedule),
 			system = system.system,
 			name = system.id,
-			source = "revy",
 		} :: types.SystemTable
 	end
 
