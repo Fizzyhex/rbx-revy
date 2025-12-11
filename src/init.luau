@@ -69,7 +69,7 @@ export type RevyAppCommands = types.RevyAppCommands
 export type System = types.System
 export type Schedule = types.Schedule
 export type PluginDef = types.PluginDef<RevyApp>
-export type Plugin = types.Plugin<RevyApp>
+export type Plugin<RevyApp> = types.Plugin<RevyApp>
 export type Resource<T = any> = types.Resource<T>
 export type Signal<T... = ...any> = types.Signal<T...>
 
