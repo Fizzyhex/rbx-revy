@@ -175,7 +175,7 @@ Default exporters can be found in `revy.exporters` - have a look before making y
 -- Anything that can only happen before an app is ran goes here
 export type RevyAppCommands = RevyApp<{
 	add_plugins: (self: RevyAppCommands, ...PluginDef<RevyApp>) -> RevyAppCommands,
-	enable_hot_reloading: (self: RevyAppCommands, container: Instance) -> RevyAppCommands,
+	enable_hot_reloading: (self: RevyAppCommands, ...Instance) -> RevyAppCommands,
 
 	--[=[
 		In-depth example: https://pepeeltoro41.github.io/replecs/started/summary/
