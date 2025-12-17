@@ -1,11 +1,38 @@
-local jecs = require("@packages/jecs")
-local planck = require("@packages/planck")
-local replecs = require("@packages/replecs")
+-- contains all of revy's types.
+-- as of writing, this file is excluded from darklua as type functions aren't supported. 
+
+local jecs = require("../roblox_packages/jecs")
+local planck = require("../roblox_packages/planck")
+local replecs = require("../roblox_packages/replecs")
 local event_util = require("@revy/events/event_util")
 
 export type Phase = planck.Phase
 export type SystemTable = planck.SystemTable<>
 export type SystemFn = planck.SystemFn<>
+
+type function ResourceTable(resources: type)
+	local resource_table = types.newtable()
+
+	for key, property in resources:properties() do
+		local read = property.read
+		assert(read, "invalid resource (1)")
+
+		-- (1: Key, 2: Value)
+		local resource_type = read:components()[2]
+		assert(resource_type, `missing generic from key`)
+
+		-- Read Resource.__T
+		local _, inner_type = next(resource_type:properties())
+		assert(inner_type, "invalid resource (2)")
+		assert(inner_type.read, "resource could not be read")
+		local inner_type_value = inner_type.read
+		assert(inner_type_value, "failed to read resource's data")
+
+		resource_table:setproperty(key, inner_type_value)
+	end
+
+	return resource_table
+end
 
 export type Signal<T... = ...any> = {
 	Connect: (self: Signal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
@@ -13,6 +40,9 @@ export type Signal<T... = ...any> = {
 	Once: (self: Signal<T...>, callback: (T...) -> ()) -> RBXScriptConnection,
 	Wait: (self: Signal<T...>) -> T...,
 }
+
+--- Type for the first return value of collectors, created with `revy.collect`
+export type Collector<T...> = () -> T...
 
 type OptionalPluginCleanup = () -> ()?
 
@@ -39,7 +69,7 @@ export type Plugin<App> = {
 	schedule: { [Schedule]: { [string]: System } },
 	next_number: number,
 	app: App,
-	acquire_resources: <T...>(plugin: Plugin<App>, fn: (T...) -> (), T...) -> (),
+	acquire_resources: <InputTable, Key, Value>(plugin: Plugin<App>, input: InputTable) -> ResourceTable<InputTable>,
 	--- Adds a new system to be scheduled with a unique id. Create new systems with `revy.system`.
 	add_system: (plugin: Plugin<App>, schedule: Schedule, def: System) -> (),
 	cleanup: () -> (),

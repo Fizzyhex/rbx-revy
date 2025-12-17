@@ -1,39 +1,39 @@
-local types = require("./types")
+local t = require("./types")
 
-type Plugin = types.Plugin<types.RevyApp>
+type Plugin = t.Plugin<t.RevyApp>
 
 local function next_number(plugin: Plugin)
 	plugin.next_number += 1
 	return plugin.next_number
 end
 
-local function schedule_system(plugin: Plugin, schedule: types.Schedule, def: types.System)
+local function schedule_system(plugin: Plugin, schedule: t.Schedule, def: t.System)
 	plugin.schedule[schedule] = plugin.schedule[schedule] or {}
 	local schedule_id = `{plugin.id} > {def.id} ({schedule} {next_number(plugin)})`
 	assert(plugin.schedule[schedule][schedule_id] == nil, `schedule already contains {schedule_id}!`)
 	plugin.schedule[schedule][schedule_id] = def
 end
 
-local function acquire_resources<T...>(plugin: Plugin, fn: (T...) -> (), ...: T...)
+local function acquire_resources<InputTable, Key, Value>(
+	plugin: Plugin,
+	input: InputTable & { [Key]: Value }
+): { [keyof<InputTable>]: index<InputTable, Key> }
 	local name = `acquire_resources`
-	local to_fetch: { unknown } = { ... }
 
 	schedule_system(plugin, "start", {
 		type = "revy_system" :: "revy_system",
 		id = name,
 		system = function()
-			local gathered = {}
-
-			for index, id in to_fetch do
-				gathered[index] = plugin.app:get_resource(id :: any)
+			for key, id in input :: { [string]: any } do
+				input[key] = plugin.app:get_resource(id :: any)
 			end
-
-			fn(table.unpack(gathered))
 		end,
 	})
+
+	return input :: any
 end
 
-local function build(plugin_def: types.PluginDef<types.RevyApp>, app: types.RevyApp)
+local function build(plugin_def: t.PluginDef<t.RevyApp>, app: t.RevyApp)
 	local plugin = {
 		id = plugin_def.id,
 		schedule = {},
@@ -41,7 +41,7 @@ local function build(plugin_def: types.PluginDef<types.RevyApp>, app: types.Revy
 		app = app,
 	} :: Plugin
 
-	plugin.acquire_resources = acquire_resources
+	plugin.acquire_resources = acquire_resources :: any
 	plugin.add_system = schedule_system
 
 	local cleanup = plugin_def.build(plugin)
@@ -51,8 +51,8 @@ local function build(plugin_def: types.PluginDef<types.RevyApp>, app: types.Revy
 end
 
 return {
-	new = function(id: string, build_fn: types.PluginBuildFn<Plugin>)
-		local plugin: types.PluginDef<types.RevyApp> = { type = "revy_plugin_def", id = id, build = build_fn }
+	new = function(id: string, build_fn: t.PluginBuildFn<Plugin>)
+		local plugin: t.PluginDef<t.RevyApp> = { type = "revy_plugin_def", id = id, build = build_fn }
 		return plugin
 	end,
 
