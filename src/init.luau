@@ -190,7 +190,7 @@ function revy.resource<T>(id: string)
 	return id :: any
 end
 
-function revy.app()
+function revy.app(): types.RevyApp<RevyAppCommands>
 	--- keeps track of what systems are loaded, as well as the plugin that they belong to, based on hot-reload friendly ids.
 	local loaded_systems: { [string]: { owner: string, system_table: types.SystemTable } } = {}
 
