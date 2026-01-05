@@ -82,8 +82,6 @@ export type Plugin<App> = {
 	world_changed: <T>(plugin: Plugin<App>, jecs.World, jecs.Entity<T>, (e: jecs.Entity, id: jecs.Id<T>, value: T, oldarchetype: jecs.Archetype) -> ()) -> () -> (),
 }
 
-jecs.world():added(_, _)
-
 export type Resource<T = any> = string & { __T: T }
 
 export type TextEntityContext = {
