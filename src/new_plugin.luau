@@ -34,18 +34,41 @@ local function acquire_resources<InputTable, Key, Value>(
 end
 
 local function build(plugin_def: t.PluginDef<t.RevyApp>, app: t.RevyApp)
+	local hook_cleanup: { () -> () } = {}
+
+	local function wrap_hook(hook_constructor)
+		return function(_plugin, ...)
+			local hook = hook_constructor(app.world, ...)
+			table.insert(hook_cleanup, hook)
+			return hook
+		end
+	end
+
 	local plugin = {
 		id = plugin_def.id,
 		schedule = {},
 		next_number = 0,
 		app = app,
+
+		world_added = wrap_hook(app.world.added),
+		world_removed = wrap_hook(app.world.removed),
+		world_changed = wrap_hook(app.world.changed),
 	} :: Plugin
 
 	plugin.acquire_resources = acquire_resources :: any
 	plugin.add_system = schedule_system
 
-	local cleanup = plugin_def.build(plugin)
-	plugin.cleanup = if cleanup then cleanup else function() end
+	local custom_cleanup_fn = plugin_def.build(plugin)
+
+	plugin.cleanup = function()
+		for _, cleanup_fn in hook_cleanup do
+			cleanup_fn()
+		end
+
+		if custom_cleanup_fn then
+			custom_cleanup_fn()
+		end
+	end
 
 	return plugin
 end

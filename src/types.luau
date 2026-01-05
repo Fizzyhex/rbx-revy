@@ -73,7 +73,16 @@ export type Plugin<App> = {
 	--- Adds a new system to be scheduled with a unique id. Create new systems with `revy.system`.
 	add_system: (plugin: Plugin<App>, schedule: Schedule, def: System) -> (),
 	cleanup: () -> (),
+	
+	--- Same as `World:added`, but automatically unregisters when the plugin is cleaned up for hot reloading support.
+	world_added: <T>(plugin: Plugin<App>, jecs.World, jecs.Entity<T>, (e: jecs.Entity, id: jecs.Id<T>, value: T, oldarchetype: jecs.Archetype) -> ()) -> () -> (),
+	--- Same as `World:removed`, but automatically unregisters when the plugin is cleaned up for hot reloading support.
+	world_removed: <T>(plugin: Plugin<App>, jecs.World, jecs.Entity<T>, (e: jecs.Entity, id: jecs.Id<T>) -> ()) -> () -> (),
+	--- Same as `World:changed`, but automatically unregisters when the plugin is cleaned up for hot reloading support.
+	world_changed: <T>(plugin: Plugin<App>, jecs.World, jecs.Entity<T>, (e: jecs.Entity, id: jecs.Id<T>, value: T, oldarchetype: jecs.Archetype) -> ()) -> () -> (),
 }
+
+jecs.world():added(_, _)
 
 export type Resource<T = any> = string & { __T: T }
 
