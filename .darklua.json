@@ -25,8 +25,14 @@
         {
             "rule": "inject_global_value",
             "identifier": "REVY_OPTIMISE_REQUIRES",
-            "env": "roblox",
             "default_value": true
+        },
+
+        {
+            "rule": "inject_global_value",
+            "identifier": "ENGINE",
+            "default_value": "standalone",
+            "env": "ENGINE"
         },
 
         "remove_unused_if_branch",

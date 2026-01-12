@@ -10,6 +10,8 @@ export type Phase = planck.Phase
 export type SystemTable = planck.SystemTable<>
 export type SystemFn = planck.SystemFn<>
 
+export type NetworkContext = "server" | "client"
+
 type function ResourceTable(resources: type)
 	local resource_table = types.newtable()
 

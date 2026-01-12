@@ -1,12 +1,16 @@
-local ContextActionService = game:GetService("ContextActionService")
-local ReplicatedStorage = game:GetService("ReplicatedStorage")
-local RunService = game:GetService("RunService")
-
-local make_jabby_remotes = require("@self/make_jabby_remotes")
-
 do
-	if RunService:IsServer() and not ReplicatedStorage:FindFirstChild("JABBY_REMOTES") then
-		make_jabby_remotes().Parent = ReplicatedStorage
+	local _context = _G.ENGINE
+end
+
+if _G.ENGINE == "prison" then
+	local RunService = game:GetService("RunService")
+	local ReplicatedStorage = game:GetService("ReplicatedStorage")
+	local make_jabby_remotes = require("@self/make_jabby_remotes")
+
+	do
+		if RunService:IsServer() and not ReplicatedStorage:FindFirstChild("JABBY_REMOTES") then
+			make_jabby_remotes().Parent = ReplicatedStorage
+		end
 	end
 end
 
@@ -14,7 +18,7 @@ local jabby, planck, planck_jabby, planck_run_service, rewire
 
 -- Darklua flag - lowers the amount of types that need to be loaded by the requirer for language
 -- server performance.
-if not _G.REVY_OPTIMISE_REQUIRES then
+if _G.ENGINE ~= "prison" and not _G.REVY_OPTIMISE_REQUIRES then
 	jabby = require("@packages/jabby")
 	planck = require("@packages/planck")
 	planck_jabby = require("@packages/planck_jabby")
@@ -74,6 +78,8 @@ export type Resource<T = any> = types.Resource<T>
 export type Signal<T... = ...any> = types.Signal<T...>
 
 export type Bundle<T...> = bundles.Bundle<T...>
+
+export type NetworkContext = types.NetworkContext
 
 local schedule_phase_map = {
 	start = planck.Phase.Startup,
@@ -352,8 +358,8 @@ function revy.app(): types.RevyApp<RevyAppCommands>
 		end
 	end
 
-	function app:run()
-		if RunService:IsClient() then
+	function app:run(context: NetworkContext)
+		if context == "client" then
 			app.network.client:init(app.world)
 		else
 			app.network.server:init(app.world)
@@ -379,7 +385,7 @@ function revy.app(): types.RevyApp<RevyAppCommands>
 			name = "Revy World",
 			configuration = {
 				world = app.world,
-				get_entity_from_part = function(part)
+				get_entity_from_part = function(part: Instance): (unknown, unknown)
 					while part.Parent do
 						if entity_instance_map[part] then
 							return entity_instance_map[part], part
@@ -387,11 +393,13 @@ function revy.app(): types.RevyApp<RevyAppCommands>
 
 						part = part.Parent
 					end
+
+					return nil, nil
 				end,
 			},
 		})
 
-		if RunService:IsClient() then
+		if context == "client" then
 			local client = jabby.obtain_client()
 
 			local function create_widget()
@@ -412,100 +420,106 @@ function revy.app(): types.RevyApp<RevyAppCommands>
 	end
 
 	function app:bind_debugger(key_code: Enum.KeyCode)
-		ContextActionService:BindAction("Open Debugger (Jabby)", function(_, state, _)
-			if state == Enum.UserInputState.Begin then
-				app:open_debugger()
-				return Enum.ContextActionResult.Sink
-			end
+		if _G.ENGINE == "roblox" then
+			game:GetService("ContextActionService"):BindAction("Open Debugger (Jabby)", function(_, state, _)
+				if state == Enum.UserInputState.Begin then
+					app:open_debugger()
+					return Enum.ContextActionResult.Sink
+				end
 
-			return Enum.ContextActionResult.Pass
-		end, false, key_code)
+				return Enum.ContextActionResult.Pass
+			end, false, key_code)
+		end
 
 		return self
 	end
 
 	--- Enables hot reloading for all descendants of the provided instances.
 	function app:enable_hot_reloading(...: Instance)
-		for _, container in { ... } do
-			hot_reloader:scan(container, function(module, context)
-				local ok, system_or_plugin = pcall(require :: any, module)
+		if _G.ENGINE == "prison" then
+			for _, container in { ... } do
+				hot_reloader:scan(container, function(module, context)
+					local ok, system_or_plugin = pcall(require :: any, module)
 
-				if not ok then
-					logger.lib_warn(`hot reload failed - require({module:GetFullName()}) -> {system_or_plugin}`)
-					return
-				end
-
-				if typeof(system_or_plugin) ~= "table" then
-					logger.lib_warn(`hot reload failed - typeof(require({module:GetFullName()})) ~= table`)
-					return
-				end
-
-				if system_or_plugin.plugin then
-					system_or_plugin = system_or_plugin.plugin
-				end
-
-				local id = system_or_plugin.id
-
-				if typeof(id) ~= "string" then
-					logger.lib_warn(
-						`hot reload failed - require({module:GetFullName()}).id == {id} --- expected string`
-					)
-					return
-				end
-
-				if not context.isReloading then
-					return
-				end
-
-				if system_or_plugin.type == "revy_plugin_def" then
-					print(`| + loading plugin {id}...`)
-					print("|----------------------")
-					print(`|*log for {id} here`)
-
-					local old = loaded_plugins[system_or_plugin.id]
-					local result = load_plugin(system_or_plugin, true)
-
-					if old then
-						-- unload any systems from the old plugin that aren't being replaced
-						for loaded_id, loaded_data in loaded_systems do
-							if loaded_data.owner == system_or_plugin.id and not result.successful_loads[loaded_id] then
-								print(`destroying dead system {loaded_id}`)
-								destroy_system(loaded_id)
-							end
-						end
+					if not ok then
+						logger.lib_warn(`hot reload failed - require({module:GetFullName()}) -> {system_or_plugin}`)
+						return
 					end
 
-					print("|----------------------")
-					print("|✅ Done!")
-				elseif system_or_plugin.type == "revy_system" then
-					logger.lib_warn(
-						`systems cannot be hot reloaded currently - use revy.plugin instead of revy.system.\n(source: {id} @ {module:GetFullName()})`
-					)
-				else
-					logger.lib_warn(
-						`require({module:GetFullName()}).type hasn't been identified as a revy plugin or system. No loading will occur.`
-					)
-				end
-			end, function(module, context)
-				if context.isReloading then
-					return
-				end
+					if typeof(system_or_plugin) ~= "table" then
+						logger.lib_warn(`hot reload failed - typeof(require({module:GetFullName()})) ~= table`)
+						return
+					end
 
-				local ok, system_or_plugin = pcall(require :: any, module)
+					if system_or_plugin.plugin then
+						system_or_plugin = system_or_plugin.plugin
+					end
 
-				if not ok then
-					logger.lib_warn(
-						`require({module:GetFullName()}) failed - cannot unload system. error: {system_or_plugin}`
-					)
-					return
-				end
+					local id = system_or_plugin.id
 
-				local to_cleanup = loaded_plugins[system_or_plugin.id]
+					if typeof(id) ~= "string" then
+						logger.lib_warn(
+							`hot reload failed - require({module:GetFullName()}).id == {id} --- expected string`
+						)
+						return
+					end
 
-				if to_cleanup then
-					to_cleanup.cleanup()
-				end
-			end)
+					if not context.isReloading then
+						return
+					end
+
+					if system_or_plugin.type == "revy_plugin_def" then
+						print(`| + loading plugin {id}...`)
+						print("|----------------------")
+						print(`|*log for {id} here`)
+
+						local old = loaded_plugins[system_or_plugin.id]
+						local result = load_plugin(system_or_plugin, true)
+
+						if old then
+							-- unload any systems from the old plugin that aren't being replaced
+							for loaded_id, loaded_data in loaded_systems do
+								if
+									loaded_data.owner == system_or_plugin.id and not result.successful_loads[loaded_id]
+								then
+									print(`destroying dead system {loaded_id}`)
+									destroy_system(loaded_id)
+								end
+							end
+						end
+
+						print("|----------------------")
+						print("|✅ Done!")
+					elseif system_or_plugin.type == "revy_system" then
+						logger.lib_warn(
+							`systems cannot be hot reloaded currently - use revy.plugin instead of revy.system.\n(source: {id} @ {module:GetFullName()})`
+						)
+					else
+						logger.lib_warn(
+							`require({module:GetFullName()}).type hasn't been identified as a revy plugin or system. No loading will occur.`
+						)
+					end
+				end, function(module, context)
+					if context.isReloading then
+						return
+					end
+
+					local ok, system_or_plugin = pcall(require :: any, module)
+
+					if not ok then
+						logger.lib_warn(
+							`require({module:GetFullName()}) failed - cannot unload system. error: {system_or_plugin}`
+						)
+						return
+					end
+
+					local to_cleanup = loaded_plugins[system_or_plugin.id]
+
+					if to_cleanup then
+						to_cleanup.cleanup()
+					end
+				end)
+			end
 		end
 
 		return self
