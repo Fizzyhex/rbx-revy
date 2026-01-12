@@ -45,7 +45,6 @@ local text_entity_default_parsers = require("@revy/text_entity/text_entity_defau
 local collect = require("@self/collect")
 local interval = require("@self/interval")
 local new_plugin = require("@self/new_plugin")
-local remotes = require("@self/remotes")
 local types = require("@self/types")
 local bundles = require("@self/bundles/bundles")
 local jecs_internal = require("@self/jecs_internal")
@@ -81,14 +80,27 @@ export type Bundle<T...> = bundles.Bundle<T...>
 
 export type NetworkContext = types.NetworkContext
 
-local schedule_phase_map = {
-	start = planck.Phase.Startup,
-	first = planck_run_service.Phases.First,
-	events = planck_run_service.Phases.PreUpdate,
-	update = planck_run_service.Phases.Update,
-	last = planck_run_service.Phases.Last,
-	pre_render = planck_run_service.Phases.PreRender,
-}
+local schedule_phase_map: { [string]: typeof(planck.Phase.Startup) }
+
+if _G.ENGINE == "prison" then
+	schedule_phase_map = {
+		start = planck.Phase.Startup,
+		first = planck_run_service.Phases.First,
+		events = planck_run_service.Phases.PreUpdate,
+		update = planck_run_service.Phases.Update,
+		last = planck_run_service.Phases.Last,
+		pre_render = planck_run_service.Phases.PreRender,
+	}
+else
+	schedule_phase_map = {
+		start = planck.Phase.Startup,
+		first = planck.Phase.new("first"),
+		events = planck.Phase.new("events"),
+		update = planck.Phase.new("update"),
+		last = planck.Phase.new("last"),
+		pre_render = planck.Phase.new("pre_render"),
+	}
+end
 
 local DO_NOTHING = function() end
 
@@ -96,8 +108,12 @@ local updates_interval = interval(1 / 20)
 local unreliables_interval = interval(1 / 30)
 
 local revy = {
-	--- This is Jecs. Docs: https://ukendio.github.io/jecs/
+	--- This is Jecs. See `how_to` and `modules` for guidance: https://github.com/Ukendio/jecs
 	ecs = jecs,
+	--- Built-in phases exposed by Revy. If not handled by your engine, you'll need to run these in your loop.
+	---
+	--- See `revy.interval`
+	phases = schedule_phase_map,
 }
 
 revy.bundles = bundles
@@ -142,15 +158,6 @@ end
 revy.system = new_system_unnamed
 --- Defines a new system with the provided name
 revy.named_system = new_system
-
--- type inference is bad with this :(
--- revy.system = function(a, b)
--- 	if typeof(a) == "string" then
--- 		return new_system(a, b)
--- 	else
--- 		return new_system_unnamed(a)
--- 	end
--- end :: ((func: (world: jecs.World) -> ()) -> System) & (id: string, func: (world: jecs.World) -> ()) -> System
 
 --[=[
 Defines a new resource. Resources are plugin-managed data that can be shared between plugins.
@@ -209,7 +216,11 @@ function revy.app(): types.RevyApp<RevyAppCommands>
 	--- all currently loaded resources
 	local resources: { [any]: Resource } = {}
 
-	local hot_reloader = rewire.HotReloader.new()
+	local hot_reloader
+
+	if _G.ENGINE == "prison" then
+		hot_reloader = rewire.HotReloader.new()
+	end
 
 	local app = {} :: RevyAppCommands
 	app.network = replecs.create()
@@ -225,8 +236,11 @@ function revy.app(): types.RevyApp<RevyAppCommands>
 		networked = revy.networked,
 	})
 
-	local scheduler =
-		planck.Scheduler.new(app.world):addPlugin(planck_run_service.Plugin.new()):addPlugin(planck_jabby.new())
+	local scheduler = planck.Scheduler.new(app.world)
+
+	if _G.ENGINE == "prison" then
+		scheduler:addPlugin(planck_run_service.Plugin.new()):addPlugin(planck_jabby.new())
+	end
 
 	function app:insert_resource<T>(resource: Resource<T>, data: T)
 		resources[resource] = data :: any
@@ -575,29 +589,31 @@ end
 
 revy.Export = Export
 
-local Renderer = jecs.component() :: types.Renderer
-jecs.meta(Renderer, jecs.Name, "Renderer")
-jecs.meta(Renderer, revy.Export, text_entity_default_parsers.path)
-
-local Transform = jecs.component() :: types.Transform
-jecs.meta(Transform, jecs.Name, "Transform")
-jecs.meta(Transform, revy.Export, text_entity_default_parsers.CFrame)
-
 local FrameEvent = jecs.component()
 jecs.meta(FrameEvent, jecs.Name, "revy.FrameEvent")
 
---- A built-in component used for displaying models in the datamodel.
-revy.renderer = Renderer
+if _G.ENGINE == "prison" then
+	local Renderer = jecs.component() :: types.Renderer
+	jecs.meta(Renderer, jecs.Name, "Renderer")
+	jecs.meta(Renderer, revy.Export, text_entity_default_parsers.path)
 
---- A built-in component that represents object transforms.
-revy.transform = Transform
+	local Transform = jecs.component() :: types.Transform
+	jecs.meta(Transform, jecs.Name, "Transform")
+	jecs.meta(Transform, revy.Export, text_entity_default_parsers.CFrame)
+
+	--- A built-in component used for displaying models in the datamodel.
+	revy.renderer = Renderer
+
+	--- A built-in component that represents object transforms.
+	revy.transform = Transform
+end
 
 --- Alias for `revy.network.networked` / `replecs.networked`
 revy.networked = replecs.networked
 --- Alias for `revy.network.reliable` / `replecs.reliable`
-revy.reliable = replecs.reliable
+revy.net_reliable = replecs.reliable
 --- Alias for `revy.network.unreliable` / `replecs.unreliable`
-revy.unreliable = replecs.unreliable
+revy.net_unreliable = replecs.unreliable
 --- Alias for `revy.network.pair` / `replecs.pair`
 revy.net_pair = replecs.pair
 --- Alias for `revy.network.custom` / `replecs.custom`
@@ -630,61 +646,63 @@ revy.plugins.events_plugin = revy.plugin("revy.events", function(plugin)
 end)
 
 revy.plugins.network_plugin = revy.plugin("revy.network", function(plugin)
-	local app = plugin.app
+	if _G.ENGINE == "roblox" then
+		local RunService = game:GetService("RunService")
+		local remotes = require("@self/remotes")
+		local app = plugin.app
 
-	if RunService:IsServer() then
-		remotes.receive_full.OnServerInvoke = function(player): ...any
-			if app.network.server:is_player_ready(player) then
-				return nil
+		if RunService:IsServer() then
+			remotes.receive_full.OnServerInvoke = function(player): ...any
+				if app.network.server:is_player_ready(player) then
+					return nil
+				end
+
+				app.network.server:mark_player_ready(player)
+				return app.network.server:get_full(player)
 			end
 
-			app.network.server:mark_player_ready(player)
-			return app.network.server:get_full(player)
+			plugin:add_system(
+				"update",
+				revy.system(function()
+					if updates_interval() then
+						for player, buf, variants in app.network.server:collect_updates() do
+							remotes.collect_updates:FireClient(player, buf, variants)
+						end
+					end
+
+					if unreliables_interval() then
+						for player, buf, variants in app.network.server:collect_unreliable() do
+							remotes.collect_unreliable:FireClient(player, buf, variants)
+						end
+					end
+				end)
+			)
+		else
+			local updates = revy.collect(remotes.collect_updates.OnClientEvent)
+			local unreliables = revy.collect(remotes.collect_unreliable.OnClientEvent)
+
+			task.spawn(function()
+				local buf, variants = remotes.receive_full:InvokeServer()
+				app.network.client:apply_full(buf, variants)
+			end)
+
+			plugin:add_system(
+				"update",
+				revy.system(function()
+					for buf, variants in updates do
+						app.network.client:apply_updates(buf, variants)
+					end
+
+					for buf, variants in unreliables do
+						app.network.client:apply_unreliable(buf, variants)
+					end
+				end)
+			)
 		end
-
-		plugin:add_system(
-			"update",
-			revy.system(function()
-				if updates_interval() then
-					for player, buf, variants in app.network.server:collect_updates() do
-						remotes.collect_updates:FireClient(player, buf, variants)
-					end
-				end
-
-				if unreliables_interval() then
-					for player, buf, variants in app.network.server:collect_unreliable() do
-						remotes.collect_unreliable:FireClient(player, buf, variants)
-					end
-				end
-			end)
-		)
-	else
-		local updates = revy.collect(remotes.collect_updates.OnClientEvent)
-		local unreliables = revy.collect(remotes.collect_unreliable.OnClientEvent)
-
-		task.spawn(function()
-			local buf, variants = remotes.receive_full:InvokeServer()
-			app.network.client:apply_full(buf, variants)
-		end)
-
-		plugin:add_system(
-			"update",
-			revy.system(function()
-				for buf, variants in updates do
-					app.network.client:apply_updates(buf, variants)
-				end
-
-				for buf, variants in unreliables do
-					app.network.client:apply_unreliable(buf, variants)
-				end
-			end)
-		)
 	end
 
 	return nil
 end)
-
-revy.resources.time = revy.resource("revy.time") :: Resource<{ delta: number }>
 
 revy.plugins.time_plugin = revy.plugin("revy.time", function(plugin)
 	local app = plugin.app
@@ -704,5 +722,7 @@ revy.plugins.time_plugin = revy.plugin("revy.time", function(plugin)
 
 	return nil
 end)
+
+revy.resources.time = revy.resource("revy.time") :: Resource<{ delta: number }>
 
 return table.freeze(revy)

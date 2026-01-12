@@ -5,13 +5,29 @@
             "identifier": "PACKAGE_NAME",
             "value": "revy"
         },
+        {
+            "rule": "convert_require",
+            "current": {
+                "name": "path",
+                "sources": {
+                    "@packages": "roblox_packages",
+                    "@revy": "src",
+                    "@self": "src"
+                }
+            },
+            "target": {
+                "name": "roblox",
+                "rojo_sourcemap": "sourcemap.json",
+                "indexing_style": "wait_for_child"
+            }
+        },
 
         {
             "rule": "inject_global_value",
             "identifier": "REVY_OPTIMISE_REQUIRES",
             "default_value": true
         },
-        
+
         {
             "rule": "inject_global_value",
             "identifier": "ENGINE",

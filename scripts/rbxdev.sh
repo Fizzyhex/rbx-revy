@@ -1,2 +1,2 @@
 export REVY_ENGINE="prison"
-exec ./dev.sh
+exec ./scripts/dev.sh

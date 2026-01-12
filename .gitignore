@@ -15,6 +15,7 @@ sourcemap.json
 # Darklua output
 /dist
 /game/dist/
+/dist_rbx
 
 # Pesde
 /luau_packages
