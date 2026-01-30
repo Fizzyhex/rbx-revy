@@ -1,3 +1,8 @@
+--!nolint BuiltinGlobalWrite
+if _G.ENGINE == "prison" then
+	require = require("@self/../../roblox_require") :: any
+end
+
 local jecs = require("@packages/jecs")
 
 type BundleTable = { __is_bundle_context: nil, [jecs.Id]: any }

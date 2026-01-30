@@ -1,3 +1,8 @@
+--!nolint BuiltinGlobalWrite
+if _G.ENGINE == "prison" then
+	require = require("@self/../../roblox_require") :: any
+end
+
 local jecs = require("@packages/jecs")
 local replecs = require("@packages/replecs")
 local logger = require("@revy/log/logger")

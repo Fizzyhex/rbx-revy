@@ -1,11 +1,16 @@
+--!nolint BuiltinGlobalWrite
+if _G.ENGINE == "prison" then
+	require = require("@self/roblox_require") :: any
+end
+
 do
-	local _context = _G.ENGINE
+	local _context = _G.ENGINE -- here for debugging purposes.
 end
 
 if _G.ENGINE == "prison" then
 	local RunService = game:GetService("RunService")
 	local ReplicatedStorage = game:GetService("ReplicatedStorage")
-	local make_jabby_remotes = require("@self/make_jabby_remotes")
+	local make_jabby_remotes = require("@revy/./make_jabby_remotes")
 
 	do
 		if RunService:IsServer() and not ReplicatedStorage:FindFirstChild("JABBY_REMOTES") then
@@ -42,12 +47,12 @@ local event_util = require("@revy/events/event_util")
 local logger = require("@revy/log/logger")
 local text_entity_default_parsers = require("@revy/text_entity/text_entity_default_parsers")
 
-local collect = require("@self/collect")
-local interval = require("@self/interval")
-local new_plugin = require("@self/new_plugin")
-local types = require("@self/types")
-local bundles = require("@self/bundles/bundles")
-local jecs_internal = require("@self/jecs_internal")
+local collect = require("@revy/collect")
+local interval = require("@revy/interval")
+local new_plugin = require("@revy/new_plugin")
+local types = require("@revy/types")
+local bundles = require("@revy/bundles/bundles")
+local jecs_internal = require("@revy/jecs_internal")
 
 export type Archetype = jecs.Archetype
 export type QueryInner = jecs.QueryInner
@@ -123,7 +128,7 @@ revy.interval = interval
 revy.exporters = text_entity_default_parsers
 
 local Export = jecs.component() :: Id
-local text_entity_util = require("@self/text_entity/text_entity_util")(Export)
+local text_entity_util = require("@revy/text_entity/text_entity_util")(Export)
 
 --[=[
 	Creates a new `Text Entity`.
@@ -373,6 +378,13 @@ function revy.app(): types.RevyApp<RevyAppCommands>
 	end
 
 	function app:run(context: NetworkContext)
+		if _G.ENGINE == "prison" then
+			if not context then
+				local RunService = game:GetService("RunService")
+				context = if RunService:IsClient() then "client" else "server"
+			end
+		end
+
 		if context == "client" then
 			app.network.client:init(app.world)
 		else
@@ -434,7 +446,7 @@ function revy.app(): types.RevyApp<RevyAppCommands>
 	end
 
 	function app:bind_debugger(key_code: Enum.KeyCode)
-		if _G.ENGINE == "roblox" then
+		if _G.ENGINE == "prison" then
 			game:GetService("ContextActionService"):BindAction("Open Debugger (Jabby)", function(_, state, _)
 				if state == Enum.UserInputState.Begin then
 					app:open_debugger()
@@ -648,7 +660,7 @@ end)
 revy.plugins.network_plugin = revy.plugin("revy.network", function(plugin)
 	if _G.ENGINE == "roblox" then
 		local RunService = game:GetService("RunService")
-		local remotes = require("@self/remotes")
+		local remotes = require("@revy/remotes")
 		local app = plugin.app
 
 		if RunService:IsServer() then

@@ -1,6 +1,11 @@
 #!/bin/sh
 # ref: https://github.com/grilme99/roblox-project-template/blob/main/scripts/dev.sh
 
+# This script is for working on Revy with Roblox Studio by syncing scripts into the testing game.
+#
+# After updating Revy's source, make sure to stop this script and re-run it to get the latest
+# changes.
+
 # Stop execution if any tasks fail
 set -e
 
@@ -11,6 +16,8 @@ fi
 
 BOLD_GREEN='\033[1;32m'
 NC='\033[0m' # No Color
+
+export REVY_ENGINE="prison"
 
 printf "${BOLD_GREEN}Processing latest Revy changes${NC}\n"
 

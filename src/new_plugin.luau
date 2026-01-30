@@ -1,4 +1,9 @@
-local t = require("./types")
+--!nolint BuiltinGlobalWrite
+if _G.ENGINE == "prison" then
+	require = require("@self/../roblox_require") :: any
+end
+
+local t = require("@revy/types")
 
 type Plugin = t.Plugin<t.RevyApp>
 

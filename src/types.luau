@@ -1,9 +1,13 @@
+--!nolint BuiltinGlobalWrite
 -- contains all of revy's types.
--- as of writing, this file is excluded from darklua as type functions aren't supported. 
 
-local jecs = require("../roblox_packages/jecs")
-local planck = require("../roblox_packages/planck")
-local replecs = require("../roblox_packages/replecs")
+if _G.ENGINE == "prison" then
+	require = require("@self/../roblox_require") :: any
+end
+
+local jecs = require("@packages/jecs")
+local planck = require("@packages/planck")
+local replecs = require("@packages/replecs")
 local event_util = require("@revy/events/event_util")
 
 export type Phase = planck.Phase

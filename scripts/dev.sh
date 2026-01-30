@@ -1,4 +1,5 @@
 #!/bin/sh
+
 # ref: https://github.com/grilme99/roblox-project-template/blob/main/scripts/dev.sh
 
 # Stop execution if any tasks fail
