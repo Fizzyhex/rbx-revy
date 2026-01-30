@@ -121,6 +121,10 @@ local revy = {
 	phases = schedule_phase_map,
 }
 
+--- A built-in pair for resources that exist in the world.
+revy.resource_c = jecs.component() :: jecs.Id<unknown>
+jecs.meta(revy.resource_c, jecs.Name, "revy.Resource")
+
 revy.bundles = bundles
 revy.plugin = new_plugin.new
 revy.collect = collect
@@ -129,6 +133,65 @@ revy.exporters = text_entity_default_parsers
 
 local Export = jecs.component() :: Id
 local text_entity_util = require("@revy/text_entity/text_entity_util")(Export)
+
+--[=[
+Points to a resource. Access it with `resource_pointer[1]`.
+]=]
+export type ResourcePointer<T> = { T }
+
+--[=[
+Provides a pointer resources to the plugin's build function. Accepts up to 9 resources as arguments for readability.
+	
+If some *(scary)* use-case requires more than 9, you can call this function multiple times instead.
+
+```luau
+return revy.plugin("game.my_plugin", function(plugin, time_r)
+	plugin:add_system(
+		"update",
+		revy.system(function(world)
+			workspace:SetAttribute("delta_time", time_r[1].delta)
+		end)
+	)
+end, revy.use_resource(revy.resources.time))
+```
+]=]
+function revy.use_resource<R1, R2, R3, R4, R5, R6, R7, R8, R9, R10>(
+	resource: Resource<R1>,
+	resource_2: Resource<R2>?,
+	resource_3: Resource<R3>?,
+	resource_4: Resource<R4>?,
+	resource_5: Resource<R5>?,
+	resource_6: Resource<R6>?,
+	resource_7: Resource<R7>?,
+	resource_8: Resource<R8>?,
+	resource_9: Resource<R9>?
+)
+	type RP<T> = ResourcePointer<T>
+
+	local resources = {
+		resource,
+		resource_2,
+		resource_3,
+		resource_4,
+		resource_5,
+		resource_6,
+		resource_7,
+		resource_8,
+		resource_9,
+	}
+
+	return function(plugin: Plugin<any>): (RP<R1>, RP<R2>, RP<R3>, RP<R4>, RP<R5>, RP<R6>, RP<R7>, RP<R8>, RP<R9>)
+		local pointers = {} :: { any }
+
+		for index, r in resources do
+			if r then
+				pointers[index] = r
+			end
+		end
+
+		return unpack(pointers)
+	end
+end
 
 --[=[
 	Creates a new `Text Entity`.
@@ -205,7 +268,9 @@ return {
 ```
 ]=]
 function revy.resource<T>(id: string)
-	return id :: any
+	local resource = jecs.component()
+	jecs.meta(resource, jecs.Name, `revy.Resource ({id})`)
+	return resource :: any
 end
 
 function revy.app(): types.RevyApp<RevyAppCommands>
@@ -217,9 +282,6 @@ function revy.app(): types.RevyApp<RevyAppCommands>
 
 	--- keeps track of all currently loaded plugins by id.
 	local loaded_plugins: { [string]: types.Plugin<RevyApp> } = {}
-
-	--- all currently loaded resources
-	local resources: { [any]: Resource } = {}
 
 	local hot_reloader
 
@@ -236,8 +298,8 @@ function revy.app(): types.RevyApp<RevyAppCommands>
 	app.event_context = event_context
 
 	local parser_context = text_entity_util.new_parser_context(app.world, {
-		reliable = revy.reliable,
-		unreliable = revy.unreliable,
+		reliable = revy.net_reliable,
+		unreliable = revy.net_unreliable,
 		networked = revy.networked,
 	})
 
@@ -247,8 +309,9 @@ function revy.app(): types.RevyApp<RevyAppCommands>
 		scheduler:addPlugin(planck_run_service.Plugin.new()):addPlugin(planck_jabby.new())
 	end
 
+	--- Inserts the resource into the world. Query for `revy.Resource` to see all inserted resources.
 	function app:insert_resource<T>(resource: Resource<T>, data: T)
-		resources[resource] = data :: any
+		app.world:set(resource, revy.resource_c, data)
 		return self
 	end
 
@@ -260,8 +323,15 @@ function revy.app(): types.RevyApp<RevyAppCommands>
 		return event_util.consumer(event_context)
 	end
 
+	--- Gets a resource from the world. Query for `revy.Resource` to see all inserted resources.
 	function app:get_resource<T>(resource: Resource<T>)
-		return resources[resource :: any] :: any
+		local result = app.world:get(resource, revy.resource_c)
+		assert(
+			result ~= nil,
+			`resource not found in world - it may have not been initialized yet if you're not accessing from within a system.`
+		)
+
+		return result :: T
 	end
 
 	function app:load_text_entity(entity, text_entity: types.TextEntityContext, context: any)
@@ -641,6 +711,7 @@ revy.network = replecs
 --- Built-in plugins that are enabled by default.
 revy.plugins = {}
 
+--- Built-in resources.
 revy.resources = {}
 
 revy.plugins.events_plugin = revy.plugin("revy.events", function(plugin)

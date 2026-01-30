@@ -63,7 +63,14 @@ local function build(plugin_def: t.PluginDef<t.RevyApp>, app: t.RevyApp)
 	plugin.acquire_resources = acquire_resources :: any
 	plugin.add_system = schedule_system
 
-	local custom_cleanup_fn = plugin_def.build(plugin)
+	local extra_args = {}
+
+	for index, addon in plugin_def.addons do
+		print("addons", plugin_def.addons)
+		extra_args[index] = addon(plugin)
+	end
+
+	local custom_cleanup_fn = plugin_def.build(plugin :: any, table.unpack(extra_args))
 
 	plugin.cleanup = function()
 		for _, cleanup_fn in hook_cleanup do
@@ -79,8 +86,9 @@ local function build(plugin_def: t.PluginDef<t.RevyApp>, app: t.RevyApp)
 end
 
 return {
-	new = function(id: string, build_fn: t.PluginBuildFn<Plugin>)
-		local plugin: t.PluginDef<t.RevyApp> = { type = "revy_plugin_def", id = id, build = build_fn }
+	new = function<Addons...>(id: string, build_fn: t.PluginBuildFn<Plugin, Addons...>, ...: Addons...)
+		local plugin: t.PluginDef<t.RevyApp, Addons...> =
+			{ type = "revy_plugin_def", id = id, build = build_fn, addons = { ... :: any } }
 		return plugin
 	end,
 

@@ -4,14 +4,9 @@ local revy = require("@revy")
 local dialog_resource_plugin = require("./dialog_resource_plugin")
 local game_components = require("../game_components")
 
-return revy.plugin("game.dialog_cycler", function(plugin)
+return revy.plugin("game.dialog_cycler", function(plugin, dialog_resource)
 	local app = plugin.app
 	local event_consumer = app:event_consumer()
-	local dialog_resource: dialog_resource_plugin.DialogResourceData
-
-	plugin:acquire_resources(function(...)
-		dialog_resource = ...
-	end, dialog_resource_plugin.RESOURCE)
 
 	plugin:add_system(
 		"update",
@@ -24,7 +19,7 @@ return revy.plugin("game.dialog_cycler", function(plugin)
 					continue
 				end
 
-				dialog_resource.say(id, dialog[dialog_cycler.index])
+				dialog_resource[1].say(id, dialog[dialog_cycler.index])
 				dialog_cycler.index += 1
 
 				if dialog_cycler.index > #dialog then
@@ -35,4 +30,4 @@ return revy.plugin("game.dialog_cycler", function(plugin)
 	)
 
 	return nil
-end)
+end, revy.use_resource(dialog_resource_plugin.RESOURCE))

@@ -53,7 +53,7 @@ export type Collector<T...> = () -> T...
 type OptionalPluginCleanup = () -> ()?
 
 --- User defined function that configures the plugin's data and (optionally) describes how to clean it up for hot-reloading.
-export type PluginBuildFn<T> = (plugin: T) -> OptionalPluginCleanup | never
+export type PluginBuildFn<T, Addons...> = (plugin: T, Addons...) -> OptionalPluginCleanup | never
 
 export type System = {
 	type: "revy_system",
@@ -63,10 +63,11 @@ export type System = {
 	-- set_interval: (self: System, interval: number) -> System,
 }
 
-export type PluginDef<App> = {
+export type PluginDef<App, Addons...> = {
 	type: "revy_plugin_def",
 	id: string,
-	build: PluginBuildFn<Plugin<RevyApp>>,
+	build: PluginBuildFn<Plugin<RevyApp>, Addons...>,
+	addons: { [number]: (Plugin<App>) -> unknown },
 }
 
 export type Plugin<App> = {
@@ -79,16 +80,24 @@ export type Plugin<App> = {
 	--- Adds a new system to be scheduled with a unique id. Create new systems with `revy.system`.
 	add_system: (plugin: Plugin<App>, schedule: Schedule, def: System) -> (),
 	cleanup: () -> (),
-	
+
 	--- Same as `World:added`, but automatically unregisters when the plugin is cleaned up for hot reloading support.
-	world_added: <T>(plugin: Plugin<App>, jecs.Entity<T>, (e: jecs.Entity, id: jecs.Id<T>, value: T, oldarchetype: jecs.Archetype) -> ()) -> () -> (),
+	world_added: <T>(
+		plugin: Plugin<App>,
+		jecs.Entity<T>,
+		(e: jecs.Entity, id: jecs.Id<T>, value: T, oldarchetype: jecs.Archetype) -> ()
+	) -> () -> (),
 	--- Same as `World:removed`, but automatically unregisters when the plugin is cleaned up for hot reloading support.
 	world_removed: <T>(plugin: Plugin<App>, jecs.Entity<T>, (e: jecs.Entity, id: jecs.Id<T>) -> ()) -> () -> (),
 	--- Same as `World:changed`, but automatically unregisters when the plugin is cleaned up for hot reloading support.
-	world_changed: <T>(plugin: Plugin<App>, jecs.Entity<T>, (e: jecs.Entity, id: jecs.Id<T>, value: T, oldarchetype: jecs.Archetype) -> ()) -> () -> (),
+	world_changed: <T>(
+		plugin: Plugin<App>,
+		jecs.Entity<T>,
+		(e: jecs.Entity, id: jecs.Id<T>, value: T, oldarchetype: jecs.Archetype) -> ()
+	) -> () -> (),
 }
 
-export type Resource<T = any> = string & { __T: T }
+export type Resource<T = any> = { __T: T }
 
 export type TextEntityContext = {
 	name: string?,
@@ -240,9 +249,22 @@ export type RevyAppCommands = RevyApp<{
 	run: (self: RevyAppCommands) -> RevyApp,
 }>
 
-export type Schedule = "start" | "pre_render" | "first" | "events" | "update" | "last"
+--[=[
+	the schedule decides when a system should be executed.
 
---- Default components
+	1. `addons` - ran once, for addons (such as the built-in resources) to load their stuff.
+	2. `start` - ran once.
+	3. `pre_render` - right before rendering is done.
+	4. `first` - before other systems update.
+	5. `events` - after events fire off.
+	6. `update` - where most systems update.
+	7. `last` - at the end, after everything else.
+
+	`update` is generally a good place to start.
+]=]
+export type Schedule = "addons" | "start" | "pre_render" | "first" | "events" | "update" | "last"
+
+-- Default components
 
 export type Renderer = jecs.Id<Model>
 export type Transform = jecs.Id<CFrame>
